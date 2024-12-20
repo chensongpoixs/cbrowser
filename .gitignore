@@ -1,2 +1,7 @@
 /cbrowser/cbrowser/cbrowser.vcxproj.user
 /cbrowser/.vs
+/cbrowser/cbrowser_render/x64
+/cbrowser/cbrowser/x64
+/cbrowser/deps/cef_binary_6533_windows_x64
+/cbrowser/x64
+/cbrowser/cbrowser_render/cbrowser_render.vcxproj.user
