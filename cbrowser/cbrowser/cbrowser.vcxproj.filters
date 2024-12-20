@@ -13,5 +13,72 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{3b3a8610-8c7e-4d1e-a2c0-f8041c015d65}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="base64.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="signal-restore.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="wide-string.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="browser-app.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="browser-client.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="browser-scheme.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="obs-browser-plugin.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="obs-browser-source.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="obs-browser-source-audio.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="base64.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="signal-restore.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="wide-string.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="browser-app.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="browser-client.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="browser-scheme.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="browser-version.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cef-headers.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="obs-browser-source.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ComPtr.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
