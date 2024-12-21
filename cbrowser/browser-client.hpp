@@ -22,7 +22,7 @@
 //#include <util/threading.h>
 #include "cef-headers.hpp"
 #include "obs-browser-source.hpp"
-
+#include "crender_window.h"
 struct BrowserSource;
 
 class BrowserClient : public CefClient,
@@ -41,6 +41,7 @@ class BrowserClient : public CefClient,
 	bool reroute_audio = true;
 	ControlLevel webpage_control_level = DEFAULT_CONTROL_LEVEL;
 
+
 	inline bool valid() const;
 
 	void UpdateExtraTexture();
@@ -55,6 +56,7 @@ public:
 	int channels;
 	ChannelLayout channel_layout;
 	int frames_per_buffer;
+	
 #endif
 	inline BrowserClient(BrowserSource *bs_, bool sharing_avail, bool reroute_audio_,
 			     ControlLevel webpage_control_level_)
@@ -62,6 +64,7 @@ public:
 		  reroute_audio(reroute_audio_),
 		  webpage_control_level(webpage_control_level_),
 		  bs(bs_)
+		//, render_window_ptr(NULL)
 	{
 	}
 

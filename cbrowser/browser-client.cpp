@@ -19,6 +19,7 @@
 #include "browser-client.hpp"
 #include "obs-browser-source.hpp"
 #include "base64.hpp"
+#include "crender_window.h"
 //#include <nlohmann/json.hpp>
 //#include <obs-frontend-api.h>
 //#include <obs.hpp>
@@ -272,6 +273,7 @@ bool BrowserClient::OnTooltip(CefRefPtr<CefBrowser>, CefString &text)
 void BrowserClient::OnPaint(CefRefPtr<CefBrowser>, PaintElementType type, const RectList &, const void *buffer,
 			    int width, int height)
 {
+	printf("[%s][%d][width = %u][height = %u]\n", __FUNCTION__, __LINE__, width, height);
 	if (type != PET_VIEW) {
 		// TODO Overlay texture on top of bs->texture
 		return;
@@ -337,18 +339,24 @@ void BrowserClient::UpdateExtraTexture()
 	}
 }
 
-void BrowserClient::OnAcceleratedPaint(CefRefPtr<CefBrowser>, PaintElementType type, const RectList &,
+void BrowserClient::OnAcceleratedPaint(CefRefPtr<CefBrowser> cefbrowser, PaintElementType type, const RectList &rect,
 #if CHROME_VERSION_BUILD >= 6367
 				       const CefAcceleratedPaintInfo &info)
 #else
 				       void *shared_handle)
 #endif
 {
+
+	//printf("[%s][%d]\n", __FUNCTION__, __LINE__);
 	if (type != PET_VIEW) {
 		// TODO Overlay texture on top of bs->texture
 		return;
 	}
 
+	
+	chen::render_window_ptr.OnAcceleratedPaint(cefbrowser, type, rect, info);
+
+	return;
 	if (!valid()) {
 		return;
 	}
@@ -657,7 +665,7 @@ bool BrowserClient::OnConsoleMessage(CefRefPtr<CefBrowser>, cef_log_severity_t l
 	if (bs && bs->source)
 		sourceName = obs_source_get_name(bs->source);*/
 
-	printf(   "[obs-browser:  ]  %s (%s:%d)",      message.ToString().c_str(),
+	printf(   "[obs-browser:  ]  %s (%s:%d)\n",      message.ToString().c_str(),
 	     source.ToString().c_str(), line);
 	return false;
 }

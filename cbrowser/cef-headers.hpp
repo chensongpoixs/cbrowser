@@ -92,7 +92,7 @@ struct obs_mouse_event {
 
 struct obs_key_event {
 	uint32_t modifiers;
-	char* text;
+	char text[34] ;
 	uint32_t native_modifiers;
 	uint32_t native_scancode;
 	uint32_t native_vkey;

@@ -16,6 +16,9 @@
     <Filter Include="NewFilter1">
       <UniqueIdentifier>{3b3a8610-8c7e-4d1e-a2c0-f8041c015d65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="render">
+      <UniqueIdentifier>{78e16756-f3b1-4d95-882a-2897598b8d84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,6 +51,15 @@
     <ClCompile Include="obs-browser-source-audio.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="crender_window.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="cd3d11_win.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="crender_browser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base64.hpp">
@@ -78,6 +90,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ComPtr.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="crender_window.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="cd3d11_win.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="crender_browser.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

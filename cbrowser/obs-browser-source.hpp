@@ -91,13 +91,13 @@ struct BrowserSource {
 	bool shutdown_on_invisible = false;
 	bool is_local = false;
 	bool first_update = true;
-	bool reroute_audio = true;
+	bool reroute_audio = false;
 	std::atomic<bool> destroying = false;
 	ControlLevel webpage_control_level = DEFAULT_CONTROL_LEVEL;
 #if defined(BROWSER_EXTERNAL_BEGIN_FRAME_ENABLED) && defined(ENABLE_BROWSER_SHARED_TEXTURE)
 	bool reset_frame = false;
 #endif
-	bool is_showing = false;
+	bool is_showing = true;
 
 	inline void DestroyTextures()
 	{
@@ -130,7 +130,7 @@ struct BrowserSource {
 
 	void Destroy();
 
-	void Update(std::string browser_url/*obs_data_t *settings = nullptr*/);
+	void Update(const std::string& browser_url, uint32_t width, uint32_t height/*obs_data_t *settings = nullptr*/);
 	void Tick();
 	void Render();
 #if CHROME_VERSION_BUILD < 4103
@@ -145,7 +145,7 @@ struct BrowserSource {
 	void SendMouseMove(const struct obs_mouse_event *event, bool mouse_leave);
 	void SendMouseWheel(const struct obs_mouse_event *event, int x_delta, int y_delta);
 	void SendFocus(bool focus);
-	void SendKeyClick(const struct obs_key_event *event, bool key_up);
+	void SendKeyClick(const struct obs_key_event *event, uint32_t in_event_type);
 	void SetShowing(bool showing);
 	void SetActive(bool active);
 	void Refresh();
