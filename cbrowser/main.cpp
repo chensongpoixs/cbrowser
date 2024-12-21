@@ -1,40 +1,42 @@
-﻿//#include <iostream>
+﻿////#include <iostream>
+////
+////
+////
+////int main(int argc, char *argv[])
+////{
+////	
+////	
+////	return 0;
+////}
 //
 //
+///******************************************************************************
+// Copyright (C) 2014 by John R. Bradley <jrb@turrettech.com>
+// Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
 //
-//int main(int argc, char *argv[])
-//{
-//	
-//	
-//	return 0;
-//}
-
-
-/******************************************************************************
- Copyright (C) 2014 by John R. Bradley <jrb@turrettech.com>
- Copyright (C) 2023 by Lain Bailey <lain@obsproject.com>
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 2 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
-
- //#include <obs-frontend-api.h>
- //#include <util/threading.h>
- //#include <util/platform.h>
- //#include <util/util.hpp>
- //#include <util/dstr.hpp>
- //#include <obs-module.h>
- //#include <obs.hpp>
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ******************************************************************************/
+//
+// //#include <obs-frontend-api.h>
+// //#include <util/threading.h>
+// //#include <util/platform.h>
+// //#include <util/util.hpp>
+// //#include <util/dstr.hpp>
+// //#include <obs-module.h>
+// //#include <obs.hpp>
+//#if   30
+//
 //#include <functional>
 //#include <sstream>
 //#include <thread>
@@ -92,6 +94,11 @@
 //static std::wstring deviceId;
 //
 //bool hwaccel = true;
+//
+//
+//static std::string g_app_work_path;
+//
+//static std::string g_browser_temp_path;
 //
 ///* ========================================================================= */
 //
@@ -288,10 +295,11 @@
 //
 //static void BrowserInit(void)
 //{
-//	std::string path = "D:\\Work\\cbrowser\\cbrowser";//obs_get_module_binary_path(obs_current_module());
+//	//std::string path = "D:\\Work\\cbrowser\\cbrowser";//obs_get_module_binary_path(obs_current_module());
 //	//path = path.substr(0, path.find_last_of('/') + 1);
 //	//path += "//obs-browser-page";
-//	path += "//cbrowser_render";
+//	//path += "//cbrowser_render";
+//	std::string path = g_app_work_path;
 //#ifdef _WIN32
 //	path += ".exe";
 //	CefMainArgs args;
@@ -309,7 +317,8 @@
 //	settings.log_severity = LOGSEVERITY_DISABLE;
 //	//BPtr<char> log_path = obs_module_config_path("debug.log");
 //	//BPtr<char> log_path_abs = os_get_abs_path_ptr(log_path);
-//	 CefString(&settings.log_file) = "D:\\Work\\cbrowser\\cbrowser\\debug.log";
+//	std::string config = "D:\\Work\\cbrowser\\cbrowser\\browser";;
+//	CefString(&settings.log_file) = config + "/debug.log";// "D:\\Work\\cbrowser\\cbrowser\\debug.log";
 //	settings.windowless_rendering_enabled = true;
 //	settings.no_sandbox = false;
 //
@@ -364,7 +373,7 @@
 //#if CHROME_VERSION_BUILD <= 6533
 //	settings.persist_user_preferences = 1;
 //#endif
-//	 CefString(&settings.cache_path) = "D:\\Work\\cbrowser\\cbrowser\\browser_config\\";
+//	CefString(&settings.cache_path) = g_browser_temp_path;// "D:\\Work\\cbrowser\\cbrowser\\browser_config\\";
 //	//CefString(&settings.cache_path) = "C:\\Users\\Administrator\\AppData\\Roaming\\obs-studio\\plugin_config\\obs-browser";
 //#if !defined(__APPLE__) || defined(ENABLE_BROWSER_LEGACY)
 //	//char *abs_path = os_get_abs_path_ptr(path.c_str());
@@ -822,11 +831,11 @@
 //
 //
 ////std::function<void(FEvent cevent)>
-//
-//static void input_device_event(chen::FEvent cevent)
-//{
-//	printf("[%s][%d][type = %u]\n", __FUNCTION__, __LINE__, cevent.Event);
-//}
+////
+////static void input_device_event(chen::FEvent cevent)
+////{
+////	printf("[%s][%d][type = %u]\n", __FUNCTION__, __LINE__, cevent.Event);
+////}
 //
 //
 //class input_device_d
@@ -834,7 +843,7 @@
 //public:
 //	input_device_d()
 //	{
-//		chen::g_rtc_mgr.set_cinput_device_event_callback(std::bind(&input_device_d::input_device_event, this, std::placeholders::_1));
+//		//chen::g_rtc_mgr.set_cinput_device_event_callback(std::bind(&input_device_d::input_device_event, this, std::placeholders::_1));
 //	}
 //	~input_device_d() {}
 //
@@ -1044,93 +1053,123 @@
 //	}
 //
 //};
-
-#if 0
-int main(int argc, char* argv[])
-{
-
-	obs_module_load();
-
-
-	obs_browser_initialize();
-	Sleep(100);
-	 chen::g_rtc_mgr.init(0);
-	
-	  
-		 
-	 chen::render_window_ptr.init(1920, 1080);
-	  
-
-	 chen::g_rtc_mgr.startup("192.168.1.26", 8888, "chensong", "chensong");
-	input_device_d d;
-	browser_source_ptr = new BrowserSource();
-
-
-
-	browser_source_ptr->width = 1920;
-	browser_source_ptr->height = 1080;
-	browser_source_ptr->canvas_fps = 30;
-	browser_source_ptr->is_showing = true;
-	printf("[%s][%d]\n", __FUNCTION__, __LINE__);
-	browser_source_ptr->url = "http://www.baidu.com";
-	browser_source_ptr->CreateBrowser();
-	Sleep(1);
-	browser_source_ptr->SetActive(true);
-	browser_source_ptr->Refresh();
-	browser_source_ptr->SetShowing(true);
-	while (true)
-	{
-		//if (browser_source_ptr)
-		//{
-		//	obs_key_event event;
-		//	event.modifiers = KEYEVENT_KEYDOWN;
-		//	event.native_vkey = 71;
-		//	//event.y = 200;
-		//	 browser_source_ptr->SendKeyClick(&event, false);
-		//	browser_source_ptr->SendKeyClick(&event, true); 
-		//}
-
-		/*if (browser_source_ptr)
-		{
-			obs_mouse_event event;
-			event.modifiers = EVENTFLAG_MIDDLE_MOUSE_BUTTON;
-			event.x = 400;
-			event.y = 400;
-			browser_source_ptr->SendMouseWheel(&event, -100, -100);
-		}*/
-		
-		/*browser_source_ptr->SetActive(true);
-		browser_source_ptr->SetShowing(true);
-		browser_source_ptr->Tick();
-		browser_source_ptr->Refresh();*/
-	//	Sleep(10);
-		std::this_thread::sleep_for(std::chrono::seconds(10));
-	}
-
-
-
-	return 0;
-}
-
-#endif //
+//
+//
+//void    input_device_event(chen::FEvent cevent)
+//{
+//}
+//void    browser_init(const char* filename, const char* browser_config_path)
+//{
+//}
+//void    browser_startup(const char* url, uint32_t width, uint32_t height, uint32_t fps, set_gpu_addresses_callback callback)
+//{
+//	
+//	}
+//
+//
+//
+//int main(int argc, char* argv[])
+//{
+//	std::string app = "D:\\Work\\cbrowser\\cbrowser\\cbrowser_render";
+//	std::string config = "D:\\Work\\cbrowser\\cbrowser\\browser\\dddd";
+//	g_app_work_path = app;
+//	g_browser_temp_path = config;
+//	//void __declspec(dllimport)  input_device_event(chen::FEvent cevent);
+//	//browser_init(app.c_str(), config.c_str());
+//	obs_module_load();
+//
+//
+//	obs_browser_initialize();
+//	Sleep(100);
+//	 //chen::g_rtc_mgr.init(0);
+//	
+//	  
+//		 
+//	 chen::render_window_ptr.init(1920, 1080);
+//	  
+//
+//	// chen::g_rtc_mgr.startup("192.168.1.26", 8888, "chensong", "chensong");
+//	input_device_d d;
+//	browser_source_ptr = new BrowserSource();
+//
+//
+//
+//	browser_source_ptr->width = 1920;
+//	browser_source_ptr->height = 1080;
+//	browser_source_ptr->canvas_fps = 30;
+//	browser_source_ptr->is_showing = true;
+//	printf("[%s][%d]\n", __FUNCTION__, __LINE__);
+//	browser_source_ptr->url = "http://www.baidu.com";
+//	browser_source_ptr->CreateBrowser();
+//	Sleep(1);
+//	browser_source_ptr->SetActive(true);
+//	browser_source_ptr->Refresh();
+//	browser_source_ptr->SetShowing(true);
+//	while (true)
+//	{
+//		//if (browser_source_ptr)
+//		//{
+//		//	obs_key_event event;
+//		//	event.modifiers = KEYEVENT_KEYDOWN;
+//		//	event.native_vkey = 71;
+//		//	//event.y = 200;
+//		//	 browser_source_ptr->SendKeyClick(&event, false);
+//		//	browser_source_ptr->SendKeyClick(&event, true); 
+//		//}
+//
+//		/*if (browser_source_ptr)
+//		{
+//			obs_mouse_event event;
+//			event.modifiers = EVENTFLAG_MIDDLE_MOUSE_BUTTON;
+//			event.x = 400;
+//			event.y = 400;
+//			browser_source_ptr->SendMouseWheel(&event, -100, -100);
+//		}*/
+//		
+//		/*browser_source_ptr->SetActive(true);
+//		browser_source_ptr->SetShowing(true);
+//		browser_source_ptr->Tick();
+//		browser_source_ptr->Refresh();*/
+//	//	Sleep(10);
+//		std::this_thread::sleep_for(std::chrono::seconds(10));
+//	}
+//
+//
+//
+//	return 0;
+//}
+//
+//#endif //
+//
+//
+//
+#if     0
 #include "crender_browser.h"
-#if 0
-static void dd_(void * p)
+#include "cmediasoup_mgr.h"
+void* g_shared = NULL;
+static void dd_(void* p)
 {
+	g_shared = p;
 	printf("[%s][%d]", __FUNCTION__, __LINE__);
 }
 int main(int argc, char* argv[])
 {
 
-	std::string app = "D:/Work/cbrowser/cbrowser/cbrowser_render";
-	std::string config = "D:/Work/cbrowser/cbrowser/browser";
+	std::string app = "D:\\Work\\cbrowser\\cbrowser\\cbrowser_render";
+	std::string config = "D:\\Work\\cbrowser\\cbrowser\\browser";
 	//void __declspec(dllimport)  input_device_event(chen::FEvent cevent);
-	 chen:: browser_init(app.c_str(), config.c_str());
-	   chen::browser_startup("http://www.baidu.com", 1920, 1080, 30, &dd_);
-	   while (1)
-	   {
-		   Sleep(1);
-	   }
+	browser_init(app.c_str(), config.c_str());
+	browser_startup("http://map.baidu.com", 1920, 1080, 30, &dd_);
+
+
+	chen::cmediasoup_mgr rtc_mgr;
+	rtc_mgr.init(0);
+	rtc_mgr.startup("192.168.1.26", 8888);
+	while (1)
+	{
+		rtc_mgr.webrtc_texture(g_shared, 87, 1920, 1080);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 30));
+	}
 	return 0;
 }
 #endif //

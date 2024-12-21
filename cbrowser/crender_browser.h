@@ -31,11 +31,12 @@ purpose:		assertion macros
  
 #include <iostream>
 #include "cinput_device_event.h"
-namespace chen {
+ namespace chen{
 	typedef void(*set_gpu_addresses_callback)(void *);
+#if  10
 	void __declspec(dllimport)  input_device_event(chen::FEvent cevent);
 	void __declspec(dllimport)  browser_init(const char * filename,  const char *browser_config_path);
 	void __declspec(dllimport)  browser_startup(const char * url,uint32_t width, uint32_t height, uint32_t fps, set_gpu_addresses_callback callback);
-}
-
+#endif 
+	}
 #endif // 
