@@ -692,10 +692,7 @@ namespace chen {
                 return false;
             }
 
-            if (g_gpu_addresses_callback_ptr)
-            {
-                g_gpu_addresses_callback_ptr(pSharedHandle);
-            }
+            
             return true;
         }
 

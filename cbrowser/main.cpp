@@ -1113,3 +1113,24 @@ int main(int argc, char* argv[])
 }
 
 #endif //
+#include "crender_browser.h"
+#if 0
+static void dd_(void * p)
+{
+	printf("[%s][%d]", __FUNCTION__, __LINE__);
+}
+int main(int argc, char* argv[])
+{
+
+	std::string app = "D:/Work/cbrowser/cbrowser/cbrowser_render";
+	std::string config = "D:/Work/cbrowser/cbrowser/browser";
+	//void __declspec(dllimport)  input_device_event(chen::FEvent cevent);
+	 chen:: browser_init(app.c_str(), config.c_str());
+	   chen::browser_startup("http://www.baidu.com", 1920, 1080, 30, &dd_);
+	   while (1)
+	   {
+		   Sleep(1);
+	   }
+	return 0;
+}
+#endif //

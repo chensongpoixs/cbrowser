@@ -308,7 +308,7 @@ overflow: hidden; \
 		//BPtr<char> log_path_abs = os_get_abs_path_ptr(log_path);
 		CefString(&settings.log_file) = g_browser_config_path + "/debug.log"; //"D:\\Work\\cbrowser\\cbrowser\\debug.log";
 		settings.windowless_rendering_enabled = true;
-		settings.no_sandbox = false;
+		settings.no_sandbox = true;
 
 		uint32_t obs_ver = 33;//obs_get_version();
 		uint32_t obs_maj = obs_ver >> 24;
@@ -1057,7 +1057,10 @@ overflow: hidden; \
 	void browser_startup(const char* url, uint32_t width, uint32_t height, uint32_t fps, set_gpu_addresses_callback callback)
 	{
 	//	input_device_d d;
-		Sleep(100);
+		g_gpu_addresses_callback_ptr = callback;
+		chen::render_window_ptr.init(width, height);
+		Sleep(10);
+		
 		browser_source_ptr = new BrowserSource();
 
 

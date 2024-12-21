@@ -41,6 +41,10 @@ namespace chen {
 	}
 
 	void BrowserLayer::on_paint(void* share_handle) {
+		if (!frame_buffer_)
+		{
+			return;
+		}
 		frame_buffer_->on_paint(share_handle);
 	}
 
@@ -163,7 +167,13 @@ namespace chen {
 		ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
 		ShowWindow(hwnd_, SW_HIDE);
 		device_->create_shared_texture(DXGI_FORMAT_B8G8R8A8_UNORM, width, height);
+		printf("[%s][%d][g_gpu_addresses_callback_ptr = %p][pSharedHandle = %p]\n", 
+			__FUNCTION__, __LINE__, g_gpu_addresses_callback_ptr , device_->pSharedHandle);
+		if (g_gpu_addresses_callback_ptr)
+		{
 
+			g_gpu_addresses_callback_ptr(device_->pSharedHandle);
+		}
 		//g_rtc_mgr.webrtc_texture(device_->pSharedHandle, 87, width_, height_);
 		//SetBrowser(browser);
 		return true;
