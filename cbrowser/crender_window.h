@@ -81,7 +81,7 @@ namespace chen {
 
 	public:
 
-		bool init(int32_t width, int32_t height);
+		bool init(int32_t width, int32_t height, bool show);
 		void update();
 		void destroy();
 	public:

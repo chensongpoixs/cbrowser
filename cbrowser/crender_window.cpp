@@ -116,7 +116,7 @@ namespace chen {
 	{
 	}
 
-	bool crender_window::init(int32_t width, int32_t height)
+	bool crender_window::init(int32_t width, int32_t height, bool show)
 	{
 		
 
@@ -164,8 +164,16 @@ namespace chen {
 		browser_layer_->move(0.0f, 0.0f, 1.0f, 1.0f);
 
 		start_time_ = GetTimeNow();
-		ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
-		ShowWindow(hwnd_, SW_HIDE);
+		
+		if (show)
+		{
+			::ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
+		}
+		else
+		{
+			::ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
+			::ShowWindow(hwnd_, SW_HIDE);
+		}
 		device_->create_shared_texture(DXGI_FORMAT_B8G8R8A8_UNORM, width, height);
 		printf("[%s][%d][g_gpu_addresses_callback_ptr = %p][pSharedHandle = %p]\n", 
 			__FUNCTION__, __LINE__, g_gpu_addresses_callback_ptr , device_->pSharedHandle);

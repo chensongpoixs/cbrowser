@@ -628,7 +628,7 @@ void BrowserSource::Tick()
 #else
 	//struct obs_video_info ovi;
 	//obs_get_video_info(&ovi);
-	double video_fps = 30;//(double)ovi.fps_num / (double)ovi.fps_den;
+	double video_fps = 30.0;//(double)ovi.fps_num / (double)ovi.fps_den;
 
 	//if (!fps_custom) 
 	{

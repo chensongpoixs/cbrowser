@@ -91,3 +91,5 @@
 /vsout
 /cbrowser/client.cfg
 /deps/Release.zip
+/app/app.vcxproj.user
+/cbrowser/browser

@@ -1086,12 +1086,12 @@ overflow: hidden; \
 		//chen::g_rtc_mgr.startup("192.168.1.26", 8888, "chensong", "chensong");
 		
 	}
-	void browser_startup(const char* url, uint32_t width, uint32_t height, uint32_t fps, set_gpu_addresses_callback callback)
+	void browser_startup(const char* url, uint32_t width, uint32_t height, uint32_t fps, set_gpu_addresses_callback callback, bool show)
 	{
 	//	input_device_d d;
 		//Sleep(100);
 		chen::g_gpu_addresses_callback_ptr = callback;
-		chen::render_window_ptr.init(width, height);
+		chen::render_window_ptr.init(width, height, show);
 		
 		
 		browser_source_ptr = new BrowserSource();
