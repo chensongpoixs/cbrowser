@@ -145,10 +145,13 @@ struct BrowserSource {
 	void SendMouseMove(const CefMouseEvent& event, bool mouse_leave);
 	void SendMouseWheel(const CefMouseEvent& event, int x_delta, int y_delta);
 	void SendFocus(bool focus);
-	void SendKeyClick(const CefKeyEvent&event, uint32_t in_event_type);
+	void SendKeyClick(const CefKeyEvent&event);
 	void SetShowing(bool showing);
 	void SetActive(bool active);
 	void Refresh();
+	void OnSize();
+	void OnPaint();
+	void SendCaptureLostEvent();
 
 #if defined(BROWSER_EXTERNAL_BEGIN_FRAME_ENABLED) && defined(ENABLE_BROWSER_SHARED_TEXTURE)
 	inline void SignalBeginFrame();
@@ -158,5 +161,7 @@ struct BrowserSource {
 	CefRefPtr<CefBrowser> GetBrowser();
 };
 
+
+extern BrowserSource* browser_source_ptr;
 
 #endif // _C_BROWSER_SOURCE_H_

@@ -22,14 +22,19 @@
 			安静，淡然，代码就是我的一切，写代码就是我本心回归的最好方式，我还没找到本心猎手，但我相信，顺着这个线索，我一定能顺藤摸瓜，把他揪出来。
 ************************************************************************************************/
 #include "crender_window.h"
-
+ 
 #include "Windows.h"
+#include <windowsx.h>
+#include <Windows.h>
+#include <Windows.h>
 #include "crender_browser.h"
+#include "cutil_win.h"
+#include "cbrowser-source.hpp"
 namespace chen {
 	//cmediasoup_mgr g_rtc_mgr;;
 	set_gpu_addresses_callback     g_gpu_addresses_callback_ptr = NULL;;
 	crender_window  render_window_ptr;
-	const char kD3DClassName[] = "browser_render";
+	const wchar_t kD3DClassName[] = L"browser_render";
 	BrowserLayer::BrowserLayer(const std::shared_ptr<d3d11::Device>& device)
 		: d3d11::Layer(device, false /* flip */) {
 		frame_buffer_ = std::make_shared<d3d11::FrameBuffer>(device_);
@@ -118,11 +123,14 @@ namespace chen {
 
 	bool crender_window::init(int32_t width, int32_t height, bool show)
 	{
-		
+		const cef_color_t background_color = MainContext::Get()->GetBackgroundColor();
+		const HBRUSH background_brush = CreateSolidBrush(
+			RGB(CefColorGetR(background_color), CefColorGetG(background_color),
+				CefColorGetB(background_color)));
 
 		static ATOM wc_atom = 0;
 		if (wc_atom == 0) {
-			WNDCLASSA wc = {};
+			/*WNDCLASSA wc = {};
 
 			wc.style = CS_HREDRAW | CS_VREDRAW;
 			wc.lpfnWndProc = WindowProc;
@@ -130,13 +138,36 @@ namespace chen {
 			wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
 			wc.lpszClassName = kD3DClassName;
 
-			wc_atom = RegisterClassA(&wc);
+			wc_atom = RegisterClassA(&wc);*/
+
+
+			WNDCLASSEX wcex;
+
+			wcex.cbSize = sizeof(WNDCLASSEX);
+			wcex.style = CS_OWNDC;
+			wcex.lpfnWndProc = WindowProc;
+			wcex.cbClsExtra = 0;
+			wcex.cbWndExtra = 0;
+			wcex.hInstance = ::GetModuleHandle(nullptr);
+			wcex.hIcon = nullptr;
+			wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+			wcex.hbrBackground = background_brush;
+			wcex.lpszMenuName = nullptr;
+			wcex.lpszClassName = kD3DClassName;
+			wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+			RegisterClassEx(&wcex);
 			if (wc_atom == 0)
 				return false;
 		}
 		width_ = width;
 		height_ = height;
-		hwnd_ = CreateWindowA(kD3DClassName, "render", WS_OVERLAPPEDWINDOW, 0, 0,
+		DWORD ex_style = 0;
+		if (GetWindowLongPtr(parent_hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE) {
+			// Don't activate the browser window on creation.
+			ex_style |= WS_EX_NOACTIVATE;
+		}
+		hwnd_ = CreateWindowEx(kD3DClassName, "render", WS_OVERLAPPEDWINDOW, 0, 0,
 			static_cast<int>(width_), static_cast<int>(height_),
 			NULL, NULL, NULL, NULL);
 		// Create a D3D11 device instance.
@@ -250,17 +281,472 @@ namespace chen {
 		swap_chain_->present(true ? 0 : 1);
 	}
 
+	void crender_window::_on_mouse_event(UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		if (_is_mouse_event_from_touch(message)) {
+			return;
+		}
 
-	LRESULT WINAPI crender_window::WindowProc(HWND hwnd,
-		UINT msg,
-		WPARAM wparam,
-		LPARAM lparam) {
-		if (msg == WM_DESTROY || (msg == WM_CHAR && wparam == VK_RETURN)) {
+#if 1
+		/*if (!browser_source_ptr)
+		{
+			return;
+		}
+		browser_source_ptr->
+		CefRefPtr<CefBrowserHost> browser_host;
+		if (browser_) {
+			browser_host = browser_->GetHost();
+		}*/
+
+#endif // 
+		LONG currentTime = 0;
+		bool cancelPreviousClick = false;
+
+		if (message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN ||
+			message == WM_MBUTTONDOWN || message == WM_MOUSEMOVE ||
+			message == WM_MOUSELEAVE) {
+			currentTime = GetMessageTime();
+			int x = GET_X_LPARAM(lParam);
+			int y = GET_Y_LPARAM(lParam);
+#if 0
+			cancelPreviousClick =
+				(abs(last_click_x_ - x) > (GetSystemMetrics(SM_CXDOUBLECLK) / 2)) ||
+				(abs(last_click_y_ - y) > (GetSystemMetrics(SM_CYDOUBLECLK) / 2)) ||
+				((currentTime - last_click_time_) > GetDoubleClickTime());
+			if (cancelPreviousClick &&
+				(message == WM_MOUSEMOVE || message == WM_MOUSELEAVE)) {
+				last_click_count_ = 1;
+				last_click_x_ = 0;
+				last_click_y_ = 0;
+				last_click_time_ = 0;
+			}
+#endif 
+		}
+
+		switch (message) {
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN: 
+		{
+			::SetCapture(hwnd_);
+			::SetFocus(hwnd_);
+			int x = GET_X_LPARAM(lParam);
+			int y = GET_Y_LPARAM(lParam);
+			if (wParam & MK_SHIFT) {
+				// Start rotation effect.
+				/*last_mouse_pos_.x = current_mouse_pos_.x = x;
+				last_mouse_pos_.y = current_mouse_pos_.y = y;
+				mouse_rotation_ = true;*/
+			}
+			else {
+				CefBrowserHost::MouseButtonType btnType =
+					(message == WM_LBUTTONDOWN
+						? MBT_LEFT
+						: (message == WM_RBUTTONDOWN ? MBT_RIGHT : MBT_MIDDLE));
+				/*if (!cancelPreviousClick && (btnType == last_click_button_)) {
+					++last_click_count_;
+				}
+				else {
+					last_click_count_ = 1;
+					last_click_x_ = x;
+					last_click_y_ = y;
+				}
+				last_click_time_ = currentTime;
+				last_click_button_ = btnType;*/
+
+				if (browser_source_ptr)
+				{
+					CefMouseEvent mouse_event;
+					mouse_event.x = x;
+					mouse_event.y = y;
+					/*last_mouse_down_on_view_ = !IsOverPopupWidget(x, y);
+					ApplyPopupOffset(mouse_event.x, mouse_event.y);
+					DeviceToLogical(mouse_event, device_scale_factor_);*/
+					mouse_event.modifiers = GetCefMouseModifiers(wParam);
+					browser_source_ptr->SendMouseClick(mouse_event, btnType, false,
+						1/*last_click_count_*/);
+				}
+			}
+		} 
+		break;
+
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP:
+			if (GetCapture() == hwnd_) {
+				ReleaseCapture();
+			}
+			//if (mouse_rotation_) {
+			//	// End rotation effect.
+			//	mouse_rotation_ = false;
+			//	render_handler_->SetSpin(0, 0);
+			//}
+			//else
+			{
+				int x = GET_X_LPARAM(lParam);
+				int y = GET_Y_LPARAM(lParam);
+				CefBrowserHost::MouseButtonType btnType =
+					(message == WM_LBUTTONUP
+						? MBT_LEFT
+						: (message == WM_RBUTTONUP ? MBT_RIGHT : MBT_MIDDLE));
+				if (browser_source_ptr)
+				{
+					CefMouseEvent mouse_event;
+					mouse_event.x = x;
+					mouse_event.y = y;
+					/*if (last_mouse_down_on_view_ && IsOverPopupWidget(x, y) &&
+						(GetPopupXOffset() || GetPopupYOffset())) {
+						break;
+					}
+					ApplyPopupOffset(mouse_event.x, mouse_event.y);
+					DeviceToLogical(mouse_event, device_scale_factor_);*/
+					mouse_event.modifiers = GetCefMouseModifiers(wParam);
+					browser_source_ptr->SendMouseClick(mouse_event, btnType, true,
+						1/*last_click_count_*/);
+				}
+			}
+			break;
+
+		case WM_MOUSEMOVE: {
+			int x = GET_X_LPARAM(lParam);
+			int y = GET_Y_LPARAM(lParam);
+			//if (mouse_rotation_) {
+			//	// Apply rotation effect.
+			//	current_mouse_pos_.x = x;
+			//	current_mouse_pos_.y = y;
+			//	render_handler_->IncrementSpin(
+			//		current_mouse_pos_.x - last_mouse_pos_.x,
+			//		current_mouse_pos_.y - last_mouse_pos_.y);
+			//	last_mouse_pos_.x = current_mouse_pos_.x;
+			//	last_mouse_pos_.y = current_mouse_pos_.y;
+			//}
+			//else 
+			{
+#if 0
+				if (!mouse_tracking_)
+				{
+					// Start tracking mouse leave. Required for the WM_MOUSELEAVE event to
+					// be generated.
+					TRACKMOUSEEVENT tme;
+					tme.cbSize = sizeof(TRACKMOUSEEVENT);
+					tme.dwFlags = TME_LEAVE;
+					tme.hwndTrack = hwnd_;
+					TrackMouseEvent(&tme);
+					mouse_tracking_ = true;
+				}
+#endif 
+				if (browser_source_ptr) {
+					CefMouseEvent mouse_event;
+					mouse_event.x = x;
+					mouse_event.y = y;
+				//	ApplyPopupOffset(mouse_event.x, mouse_event.y);
+					//DeviceToLogical(mouse_event, device_scale_factor_);
+					mouse_event.modifiers = GetCefMouseModifiers(wParam);
+					browser_source_ptr->SendMouseMove(mouse_event, false);
+				}
+			}
+			break;
+		}
+
+		case WM_MOUSELEAVE: {
+#if 0
+			if (mouse_tracking_) {
+				// Stop tracking mouse leave.
+				TRACKMOUSEEVENT tme;
+				tme.cbSize = sizeof(TRACKMOUSEEVENT);
+				tme.dwFlags = TME_LEAVE & TME_CANCEL;
+				tme.hwndTrack = hwnd_;
+				TrackMouseEvent(&tme);
+				mouse_tracking_ = false;
+			}
+
+#endif
+
+
+			if (browser_source_ptr)
+			{
+				// Determine the cursor position in screen coordinates.
+				POINT p;
+				::GetCursorPos(&p);
+				::ScreenToClient(hwnd_, &p);
+
+				CefMouseEvent mouse_event;
+				mouse_event.x = p.x;
+				mouse_event.y = p.y;
+			//	DeviceToLogical(mouse_event, device_scale_factor_);
+				mouse_event.modifiers = GetCefMouseModifiers(wParam);
+				browser_source_ptr->SendMouseMove(mouse_event, true);
+			}
+		} break;
+
+		case WM_MOUSEWHEEL:
+			if (browser_source_ptr) {
+				POINT screen_point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				HWND scrolled_wnd = ::WindowFromPoint(screen_point);
+				if (scrolled_wnd != hwnd_) {
+					break;
+				}
+
+				ScreenToClient(hwnd_, &screen_point);
+				int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+				CefMouseEvent mouse_event;
+				mouse_event.x = screen_point.x;
+				mouse_event.y = screen_point.y;
+				//ApplyPopupOffset(mouse_event.x, mouse_event.y);
+				//DeviceToLogical(mouse_event, device_scale_factor_);
+				mouse_event.modifiers = GetCefMouseModifiers(wParam);
+				browser_source_ptr->SendMouseWheel(mouse_event,
+					IsKeyDown(VK_SHIFT) ? delta : 0,
+					!IsKeyDown(VK_SHIFT) ? delta : 0);
+			}
+			break;
+		}
+	}
+
+	void crender_window::_on_size()
+	{
+		// Keep |client_rect_| up to date.
+		RECT client_rect_ = {0};
+		::GetClientRect(hwnd_, &client_rect_);
+
+		if (browser_source_ptr) 
+		{
+			browser_source_ptr->OnSize();
+			//browser_->GetHost()->WasResized();
+		}
+	}
+
+	void crender_window::_on_focus(bool set_focus)
+	{
+		if (browser_source_ptr)
+		{
+			browser_source_ptr->SendFocus(set_focus);
+		}
+	}
+
+	void crender_window::_on_capture_lost()
+	{
+		if (mouse_rotation_) {
+			return;
+		}
+
+		if (browser_source_ptr)
+		{
+			browser_source_ptr->SendCaptureLostEvent();
+		}
+	}
+
+	void crender_window::_on_key_event(UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		if (!browser_source_ptr)
+		{
+			return;
+		}
+
+		CefKeyEvent event;
+		event.windows_key_code = wParam;
+		event.native_key_code = lParam;
+		event.is_system_key = message == WM_SYSCHAR || message == WM_SYSKEYDOWN ||
+			message == WM_SYSKEYUP;
+
+		if (message == WM_KEYDOWN || message == WM_SYSKEYDOWN) {
+			event.type = KEYEVENT_RAWKEYDOWN;
+		}
+		else if (message == WM_KEYUP || message == WM_SYSKEYUP) {
+			event.type = KEYEVENT_KEYUP;
+		}
+		else {
+			event.type = KEYEVENT_CHAR;
+		}
+		event.modifiers = GetCefKeyboardModifiers(wParam, lParam);
+
+		// mimic alt-gr check behaviour from
+		// src/ui/events/win/events_win_utils.cc: GetModifiersFromKeyState
+		if ((event.type == KEYEVENT_CHAR) && IsKeyDown(VK_RMENU)) {
+			// reverse AltGr detection taken from PlatformKeyMap::UsesAltGraph
+			// instead of checking all combination for ctrl-alt, just check current char
+			HKL current_layout = ::GetKeyboardLayout(0);
+
+			// https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-vkkeyscanexw
+			// ... high-order byte contains the shift state,
+			// which can be a combination of the following flag bits.
+			// 1 Either SHIFT key is pressed.
+			// 2 Either CTRL key is pressed.
+			// 4 Either ALT key is pressed.
+			SHORT scan_res = ::VkKeyScanExW(wParam, current_layout);
+			constexpr auto ctrlAlt = (2 | 4);
+			if (((scan_res >> 8) & ctrlAlt) == ctrlAlt) {  // ctrl-alt pressed
+				event.modifiers &= ~(EVENTFLAG_CONTROL_DOWN | EVENTFLAG_ALT_DOWN);
+				event.modifiers |= EVENTFLAG_ALTGR_DOWN;
+			}
+		}
+
+		browser_source_ptr->SendKeyClick(event);
+	}
+
+	void crender_window::_on_paint()
+	{
+		// Paint nothing here. Invalidate will cause OnPaint to be called for the
+		// render handler.
+		PAINTSTRUCT ps;
+		BeginPaint(hwnd_, &ps);
+		EndPaint(hwnd_, &ps);
+		if (browser_source_ptr)
+		{
+			browser_source_ptr->OnPaint();
+		}
+	}
+
+	bool crender_window::_on_erase_bkgnd()
+	{
+		// Erase the background when the browser does not exist.
+		return  browser_source_ptr == nullptr ;
+	}
+
+	bool crender_window::_is_mouse_event_from_touch(uint32_t message)
+	{
+		// Helper function to detect mouse messages coming from emulation of touch
+// events. These should be ignored.
+#define MOUSEEVENTF_FROMTOUCH 0xFF515700
+		return (message >= WM_MOUSEFIRST) && (message <= WM_MOUSELAST) &&
+			(GetMessageExtraInfo() & MOUSEEVENTF_FROMTOUCH) ==
+			MOUSEEVENTF_FROMTOUCH;
+	}
+
+
+	LRESULT WINAPI crender_window::WindowProc(HWND hWnd,
+		UINT message,
+		WPARAM wParam,
+		LPARAM lParam) {
+		/*if (msg == WM_DESTROY || (msg == WM_CHAR && wparam == VK_RETURN)) {
 			PostQuitMessage(0);
 			return 0;
 		}
 
-		return DefWindowProcA(hwnd, msg, wparam, lparam);
+		return DefWindowProcA(hwnd, msg, wparam, lparam);*/
+		crender_window* self = reinterpret_cast<crender_window*>(GetWindowLongPtr (hWnd, GWLP_USERDATA));
+		if (!self) 
+		{
+			printf("[%s][%d]\n", __FUNCTION__, __LINE__);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+
+		// We want to handle IME events before the OS does any default handling.
+		switch (message) {
+		case WM_IME_SETCONTEXT:
+		{
+			// We handle the IME Composition Window ourselves (but let the IME Candidates
+			  // Window be handled by IME through DefWindowProc()), so clear the
+			  // ISC_SHOWUICOMPOSITIONWINDOW flag:
+			lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
+			::DefWindowProc(hWnd, message, wParam, lParam);
+			return 0;
+		}
+			 
+		case WM_IME_STARTCOMPOSITION:
+		{
+			//self->OnIMEStartComposition();
+			return 0;
+		}
+		case WM_IME_COMPOSITION:
+		{
+			//self->OnIMEComposition(message, wParam, lParam);
+			return 0;
+		}
+		case WM_IME_ENDCOMPOSITION:
+		{
+			//self->OnIMECancelCompositionEvent();
+			// Let WTL call::DefWindowProc() and release its resources.
+			break;
+		}
+#if defined(CEF_USE_ATL)
+		case WM_GETOBJECT: {
+			// Only the lower 32 bits of lParam are valid when checking the object id
+			// because it sometimes gets sign-extended incorrectly (but not always).
+			DWORD obj_id = static_cast<DWORD>(static_cast<DWORD_PTR>(lParam));
+
+			// Accessibility readers will send an OBJID_CLIENT message.
+			if (static_cast<DWORD>(OBJID_CLIENT) == obj_id) {
+				//if (self->accessibility_root_) {
+				//	return LresultFromObject(
+				//		IID_IAccessible, wParam,
+				//		static_cast<IAccessible*>(self->accessibility_root_));
+				//}
+				//else {
+				//	// Notify the renderer to enable accessibility.
+				//	if (self->browser_ && self->browser_->GetHost()) {
+				//		self->browser_->GetHost()->SetAccessibilityState(STATE_ENABLED);
+				//	}
+				//}
+			}
+		} break;
+#endif
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_MOUSEMOVE:
+		case WM_MOUSELEAVE:
+		case WM_MOUSEWHEEL:
+			self->_on_mouse_event(message, wParam, lParam);
+			break;
+
+		case WM_SIZE:
+			self->_on_size();
+			break;
+
+		case WM_SETFOCUS:
+		case WM_KILLFOCUS:
+			self->_on_focus(message == WM_SETFOCUS);
+			break;
+
+		case WM_CAPTURECHANGED:
+		case WM_CANCELMODE:
+			self->_on_capture_lost();
+			break;
+
+		case WM_SYSCHAR:
+		case WM_SYSKEYDOWN:
+		case WM_SYSKEYUP:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_CHAR:
+			self->_on_key_event(message, wParam, lParam);
+			break;
+
+		case WM_PAINT:
+			self->_on_paint();
+			return 0;
+
+		case WM_ERASEBKGND:
+			if (self->_on_erase_bkgnd())
+			{
+				break;
+			}
+			// Don't erase the background.
+			return 0;
+
+			// If your application does not require Win7 support, please do consider
+			// using WM_POINTER* messages instead of WM_TOUCH. WM_POINTER are more
+			// intutive, complete and simpler to code.
+			// https://msdn.microsoft.com/en-us/library/hh454903(v=vs.85).aspx
+		case WM_TOUCH:
+			/*if (self->OnTouchEvent(message, wParam, lParam)) {
+				return 0;
+			}*/
+			break;
+
+		case WM_NCDESTROY:
+			// Clear the reference to |self|.
+			SetUserDataPtr(hWnd, nullptr);
+			self->hwnd_ = nullptr;
+			break;
+		}
+
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 }
  

@@ -38,7 +38,7 @@
 #endif
 
 //using namespace std;
-
+BrowserSource* browser_source_ptr = NULL;
 extern bool QueueCEFTask(std::function<void()> task);
 
 //static mutex browser_list_mutex;
@@ -336,11 +336,13 @@ void BrowserSource::SendFocus(bool focus)
 		true);
 }
 
-void BrowserSource::SendKeyClick(const CefKeyEvent&event, uint32_t in_event_type)
+void BrowserSource::SendKeyClick(const CefKeyEvent&event )
 {
 	if (destroying)
+	{
 		return;
-
+	}
+#if 0
 	char text = event.character;
 #ifdef __linux__
 	uint32_t native_vkey = KeyboardCodeFromXKeysym(event->native_vkey);
@@ -354,9 +356,12 @@ void BrowserSource::SendKeyClick(const CefKeyEvent&event, uint32_t in_event_type
 	uint32_t native_scancode = event->native_scancode;
 	uint32_t modifiers = event->native_modifiers;
 #endif
-
+#endif // 
+	CefKeyEvent  in_event = event;
 	ExecuteOnBrowser(
-		[=](CefRefPtr<CefBrowser> cefBrowser) {
+		[=](CefRefPtr<CefBrowser> cefBrowser) 
+		{
+#if 0
 			CefKeyEvent e;
 			
 			e.windows_key_code = native_vkey;
@@ -390,8 +395,8 @@ void BrowserSource::SendKeyClick(const CefKeyEvent&event, uint32_t in_event_type
 			//	//	e.character = wide[0];
 			//}
 			
-			
-			cefBrowser->GetHost()->SendKeyEvent(e);
+#endif 
+			cefBrowser->GetHost()->SendKeyEvent(in_event);
 //			if (/*!text.empty() && !*/key_up) {
 //				e.type = KEYEVENT_CHAR;
 //				printf("[%s][%d]\n", __FUNCTION__, __LINE__);
@@ -472,6 +477,51 @@ void BrowserSource::SetActive(bool active)
 void BrowserSource::Refresh()
 {
 	ExecuteOnBrowser([](CefRefPtr<CefBrowser> cefBrowser) { cefBrowser->ReloadIgnoreCache(); }, true);
+}
+
+void BrowserSource::OnSize()
+{
+	if (destroying)
+		return;
+	ExecuteOnBrowser(
+		[](CefRefPtr<CefBrowser> cefBrowser) 
+		{
+			if (cefBrowser)
+			{
+				cefBrowser->GetHost()->WasResized();
+			}
+		},
+		true);
+}
+
+void BrowserSource::OnPaint()
+{
+	if (destroying)
+		return;
+	ExecuteOnBrowser(
+		[](CefRefPtr<CefBrowser> cefBrowser)
+		{
+			if (cefBrowser)
+			{
+				cefBrowser->GetHost()->Invalidate(PET_VIEW);
+			}
+		},
+		true);
+}
+
+void BrowserSource::SendCaptureLostEvent()
+{
+	if (destroying)
+		return;
+	ExecuteOnBrowser(
+		[](CefRefPtr<CefBrowser> cefBrowser)
+		{
+			if (cefBrowser)
+			{
+				cefBrowser->GetHost()->SendCaptureLostEvent();
+			}
+		},
+		true);
 }
 
 void BrowserSource::SetBrowser(CefRefPtr<CefBrowser> b)

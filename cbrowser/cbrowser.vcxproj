@@ -127,7 +127,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;ENABLE_BROWSER_SHARED_TEXTURE;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;ENABLE_HEVC;HAVE_OBSCONFIG_H;BROWSER_AVAILABLE;QT_WIDGETS_LIB;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;QT_GUI_LIB;CMAKE_INTDIR="Release";obs_browser_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);CEF_USE_ATL;WIN32;_WINDOWS;NDEBUG;ENABLE_BROWSER_SHARED_TEXTURE;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;ENABLE_HEVC;HAVE_OBSCONFIG_H;BROWSER_AVAILABLE;QT_WIDGETS_LIB;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;QT_GUI_LIB;CMAKE_INTDIR="Release";obs_browser_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -148,7 +148,7 @@
     <ClCompile Include="cd3d11_win.cpp" />
     <ClCompile Include="crender_browser.cpp" />
     <ClCompile Include="crender_window.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="cutil_win.cpp" />
     <ClCompile Include="cbrowser-source.cpp" />
     <ClCompile Include="signal-restore.cpp" />
     <ClCompile Include="wide-string.cpp" />
@@ -165,6 +165,7 @@
     <ClInclude Include="crender_browser.h" />
     <ClInclude Include="crender_window.h" />
     <ClInclude Include="cbrowser-source.hpp" />
+    <ClInclude Include="cutil_win.h" />
     <ClInclude Include="signal-restore.hpp" />
     <ClInclude Include="wide-string.hpp" />
   </ItemGroup>

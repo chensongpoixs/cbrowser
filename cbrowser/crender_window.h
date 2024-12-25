@@ -89,36 +89,41 @@ namespace chen {
 			UINT msg,
 			WPARAM wparam,
 			LPARAM lparam);
-		/*void SetSpin(float spinX, float spinY)  ;
-		void IncrementSpin(float spinDX, float spinDY)  ;
-		bool IsOverPopupWidget(int x, int y)    ;
-		int GetPopupXOffset() const  ;
-		int GetPopupYOffset() const  ;
-		void OnPopupShow(CefRefPtr<CefBrowser> browser, bool show)  ;
-		void OnPopupSize(CefRefPtr<CefBrowser> browser, const CefRect& rect)  ;
-		void OnPaint(CefRefPtr<CefBrowser> browser,
-			CefRenderHandler::PaintElementType type,
-			const CefRenderHandler::RectList& dirtyRects,
-			const void* buffer,
-			int width,
-			int height) override;
-		void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
-			CefRenderHandler::PaintElementType type,
-			const CefRenderHandler::RectList& dirtyRects,
-			const CefAcceleratedPaintInfo& info)  ;*/
-
+		
 
 		void OnAcceleratedPaint(
 			CefRefPtr<CefBrowser> browser,
 			CefRenderHandler::PaintElementType type,
 			const CefRenderHandler::RectList& dirtyRects,
 			const CefAcceleratedPaintInfo& info);
+
+
+
 	private:
 		void Render()  ;
+		
+
+
+		void _on_mouse_event(UINT message, WPARAM wParam, LPARAM lParam);
+		void _on_key_event(UINT message, WPARAM wParam, LPARAM lParam);
+		void _on_size();
+		void _on_focus(bool set_focus);
+		void _on_capture_lost();
+		
+		void _on_paint();
+		bool _on_erase_bkgnd();
+	private:
+
+
+		bool _is_mouse_event_from_touch(uint32_t message);
+
+	private:
+
 		size_t width_, height_;
 
 		HWND hwnd_;
 		uint64_t start_time_ = 0;
+		bool mouse_rotation_ = false;
 		std::shared_ptr<d3d11::Device> device_;
 		std::shared_ptr<d3d11::SwapChain> swap_chain_;
 		std::shared_ptr<d3d11::Composition> composition_;

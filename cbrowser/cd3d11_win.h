@@ -42,7 +42,7 @@
 namespace chen {
 
 
-    uint64_t GetTimeNow();
+    //uint64_t GetTimeNow();
     namespace d3d11
     {
 

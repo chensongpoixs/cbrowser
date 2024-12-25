@@ -21,76 +21,55 @@
 			沿着自己的回忆，一个个的场景忽闪而过，最后发现，我的本心，在我写代码的时候，会回来。
 			安静，淡然，代码就是我的一切，写代码就是我本心回归的最好方式，我还没找到本心猎手，但我相信，顺着这个线索，我一定能顺藤摸瓜，把他揪出来。
 ************************************************************************************************/
- 
 
+
+#ifndef _C_UTIL_WIN_H_
+#define _C_UTIL_WIN_H_
+//#include "cconfig.h"
+//#include "cconfig.h"
+//#include "csingleton.h"
 #include <iostream>
-#include "crender_browser.h"
-#include <Windows.h>
-#include <thread>
-#include <windows.h>
-#include <iostream>
+#include <d3d11_1.h>
+#include <memory>
+#include <string>
+#include <vector>
+#include "include/base/cef_weak_ptr.h"
+#include "include/cef_render_handler.h"
+#include "include/base/cef_macros.h"
 
-bool IsWindows11OrLater() {
-	DWORD dwMajorVersion = 0;
-	DWORD dwMinorVersion = 0;
-	DWORD dwBuildNumber = 0;
+#include "include/internal/cef_types_wrappers.h"
 
-	// 使用 RtlGetSystemVersion 函数获取系统版本信息
-	// 注意：这个函数不是公开的 API，但在 ntdll.dll 中存在，并且被广泛用于检测 Windows 版本
-	typedef LONG(WINAPI* RtlGetSystemVersion_Proc)(PDWORD, PDWORD, PDWORD);
-	RtlGetSystemVersion_Proc RtlGetSystemVersion = (RtlGetSystemVersion_Proc)GetProcAddress(GetModuleHandleA("ntdll.dll"), "RtlGetSystemVersion");
-	if (RtlGetSystemVersion != nullptr && RtlGetSystemVersion(&dwMajorVersion, &dwMinorVersion, &dwBuildNumber) == ERROR_SUCCESS) {
-		// 检查版本号是否为 Windows 11 或更高版本
-		if (dwMajorVersion == 10 && dwMinorVersion == 0 && dwBuildNumber >= 22000) {
-			return true;
-		}
+
+
+namespace chen {
+
+	// Returns the current time in microseconds.
+	uint64_t GetTimeNow();
+
+	// Set the window's user data pointer.
+	void SetUserDataPtr(HWND hWnd, void* ptr);
+
+	// Return the window's user data pointer.
+	template <typename T>
+	T GetUserDataPtr(HWND hWnd) {
+		return reinterpret_cast<T>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 	}
-	return false;
+
+	// Set the window's window procedure pointer and return the old value.
+	WNDPROC SetWndProcPtr(HWND hWnd, WNDPROC wndProc);
+
+	// Return the resource string with the specified id.
+	std::wstring GetResourceString(UINT id);
+
+	int GetCefMouseModifiers(WPARAM wparam);
+	int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam);
+	bool IsKeyDown(WPARAM wparam);
+
+	// Returns the device scale factor. For example, 200% display scaling will
+	// return 2.0.
+	float GetDeviceScaleFactor();
+
 }
 
-int test_main() {
-	if (IsWindows11OrLater()) {
-		std::cout << "当前操作系统是 Windows 11 或更高版本。" << std::endl;
-	}
-	else {
-		std::cout << "当前操作系统不是 Windows 11。" << std::endl;
-	}
-	return 0;
-}
 
-
-
-static void _fuf(void* f)
-{
-	
-}
-
-int main(int argc, char* argv[])
-{
-	//test_main();
-	char czFileName[1024 * 4] = { 0 };
-	uint32_t length = GetModuleFileName(NULL, czFileName, _countof(czFileName) - 1);
-	strrchr(czFileName, '\\')[0] = 0;//ä¹Ÿæ˜¯å¾—åˆ°C:\Users\Jovan Yang\Desktop\è®ºæ–‡ä»£ç \UnAPK&Extract all API\Debug
-	for (uint32_t i = 0; i < length; ++i)
-	{
-		if (czFileName[i] == '/')
-		{
-			czFileName[i] = '\\';
-		}
-	}
-//	debug TODO@chensong 202412-22  cef 必须是 \\目录
-	//NORMAL_EX_LOG("[work_dir = %s]", czFileName);
-	std::string app_work = std::string(czFileName) + "\\cbrowser_render";
-	printf("app_work = %s\n", app_work.c_str());
-	std::string browser_config = std::string(czFileName) + "\\browser";
-	chen::browser_init(app_work.c_str(), browser_config.c_str());
-	chen::browser_startup("http://map.baidu.com", 1920, 1080, 30, &_fuf, true);
-
-	 
-	while (1)
-	{
-
-		Sleep(1);
-	}
-	return 0;
-}
+#endif // 

@@ -81,7 +81,7 @@ bool hwaccel = true;
 	static bool manager_initialized = false;
 
 
-	static BrowserSource* browser_source_ptr = NULL;
+	 
 
 	static  std::string  g_work_app;
 	static std::string	 g_browser_config_path;
@@ -838,46 +838,67 @@ overflow: hidden; \
 		switch (cevent.Event)
 		{
 		case chen::EventType::KEY_DOWN:
+		case chen::EventType::KEY_PRESS:
+		case chen::EventType::KEY_UP:
 		{
 
 			if (browser_source_ptr)
 			{
 				//obs_key_event event;
 				CefKeyEvent event;
-				event.modifiers = KEYEVENT_RAWKEYDOWN;
+
+
+				if (cevent.Event == chen::EventType::KEY_DOWN) 
+				{
+					event.type = KEYEVENT_RAWKEYDOWN;
+					event.modifiers = KEYEVENT_RAWKEYDOWN;
+				}
+				else if (cevent.Event == chen::EventType::KEY_UP) 
+				{
+					event.type = KEYEVENT_KEYUP;
+					event.modifiers = KEYEVENT_KEYUP;
+				}
+				else 
+				{
+					event.type = KEYEVENT_CHAR;
+					event.modifiers = KEYEVENT_CHAR;
+				}
+
+				
+			 
 				event.native_key_code = cevent.Data.KeyDown.KeyCode;//cevent.GetKeyDown();
 				//event.native_scancode = cevent.Data.KeyDown.bIsRepeat;
 				//event.y = 200;d
-				browser_source_ptr->SendKeyClick(event, 0);
+				browser_source_ptr->SendKeyClick(event);
 			}
 			break;
 		}
-		case chen::EventType::KEY_PRESS:
-		{
-			if (browser_source_ptr)
-			{
-				 
-				CefKeyEvent event;
-				event.modifiers = KEYEVENT_CHAR;
-				event.native_key_code = cevent.Data.Character.Character;//cevent.GetKeyDown();
-				//event.y = 200;
-				browser_source_ptr->SendKeyClick(event, 1);
-			}
-			break;
-		}
-		case chen::EventType::KEY_UP:
-		{
-			if (browser_source_ptr)
-			{
-				CefKeyEvent event;
-				event.modifiers = KEYEVENT_KEYUP;
-				event.native_key_code = cevent.Data.KeyUp.KeyCode;//cevent.GetKeyDown();
-				//event.native_scancode = cevent.Data.KeyUp.KeyCode;
-				//event.y = 200;d
-				browser_source_ptr->SendKeyClick( event, 2);
-			}
-			break;
-		}
+		//case chen::EventType::KEY_PRESS:
+		//{
+		//	if (browser_source_ptr)
+		//	{
+		//		 
+		//		CefKeyEvent event;
+		//		event.modifiers = KEYEVENT_CHAR;
+		//		event.native_key_code = cevent.Data.Character.Character;//cevent.GetKeyDown();
+		//		//event.y = 200;
+		//		browser_source_ptr->SendKeyClick(event);
+		//	}
+		//	break;
+		//}
+		//case chen::EventType::KEY_UP:
+		//{
+		//	if (browser_source_ptr)
+		//	{
+		//		CefKeyEvent event;
+		//		event.modifiers = KEYEVENT_KEYUP;
+		//		event.native_key_code = cevent.Data.KeyUp.KeyCode;//cevent.GetKeyDown();
+		//		//event.native_scancode = cevent.Data.KeyUp.KeyCode;
+		//		//event.y = 200;d
+		//		browser_source_ptr->SendKeyClick( event );
+		//	}
+		//	break;
+		//}
 
 		case chen::EventType::MOUSE_ENTER:
 		{

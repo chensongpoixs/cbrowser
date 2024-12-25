@@ -19,11 +19,11 @@
     <Filter Include="render">
       <UniqueIdentifier>{78e16756-f3b1-4d95-882a-2897598b8d84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{520547e6-5f51-4e1a-89d2-f3ec9cf95397}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="base64.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -53,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="crender_browser.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cutil_win.cpp">
+      <Filter>util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="crender_browser.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cutil_win.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
