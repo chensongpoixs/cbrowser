@@ -149,9 +149,7 @@
     <ClCompile Include="crender_browser.cpp" />
     <ClCompile Include="crender_window.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="obs-browser-plugin.cpp" />
-    <ClCompile Include="obs-browser-source-audio.cpp" />
-    <ClCompile Include="obs-browser-source.cpp" />
+    <ClCompile Include="cbrowser-source.cpp" />
     <ClCompile Include="signal-restore.cpp" />
     <ClCompile Include="wide-string.cpp" />
   </ItemGroup>
@@ -166,7 +164,7 @@
     <ClInclude Include="ComPtr.hpp" />
     <ClInclude Include="crender_browser.h" />
     <ClInclude Include="crender_window.h" />
-    <ClInclude Include="obs-browser-source.hpp" />
+    <ClInclude Include="cbrowser-source.hpp" />
     <ClInclude Include="signal-restore.hpp" />
     <ClInclude Include="wide-string.hpp" />
   </ItemGroup>

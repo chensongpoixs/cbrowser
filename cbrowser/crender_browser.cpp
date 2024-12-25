@@ -34,7 +34,7 @@ purpose:		assertion macros
 //#include <nlohmann/json.hpp>
 //#include <obs-websocket-api.h>
 
-#include "obs-browser-source.hpp"
+#include "cbrowser-source.hpp"
 #include "browser-scheme.hpp"
 #include "browser-app.hpp"
 #include "browser-version.h"
@@ -842,12 +842,13 @@ overflow: hidden; \
 
 			if (browser_source_ptr)
 			{
-				obs_key_event event;
+				//obs_key_event event;
+				CefKeyEvent event;
 				event.modifiers = KEYEVENT_RAWKEYDOWN;
-				event.native_vkey = cevent.Data.KeyDown.KeyCode;//cevent.GetKeyDown();
-				event.native_scancode = cevent.Data.KeyDown.bIsRepeat;
+				event.native_key_code = cevent.Data.KeyDown.KeyCode;//cevent.GetKeyDown();
+				//event.native_scancode = cevent.Data.KeyDown.bIsRepeat;
 				//event.y = 200;d
-				browser_source_ptr->SendKeyClick(&event, 0);
+				browser_source_ptr->SendKeyClick(event, 0);
 			}
 			break;
 		}
@@ -855,11 +856,12 @@ overflow: hidden; \
 		{
 			if (browser_source_ptr)
 			{
-				obs_key_event event;
+				 
+				CefKeyEvent event;
 				event.modifiers = KEYEVENT_CHAR;
-				event.native_vkey = cevent.Data.Character.Character;//cevent.GetKeyDown();
+				event.native_key_code = cevent.Data.Character.Character;//cevent.GetKeyDown();
 				//event.y = 200;
-				browser_source_ptr->SendKeyClick(&event, 1);
+				browser_source_ptr->SendKeyClick(event, 1);
 			}
 			break;
 		}
@@ -867,12 +869,12 @@ overflow: hidden; \
 		{
 			if (browser_source_ptr)
 			{
-				obs_key_event event;
+				CefKeyEvent event;
 				event.modifiers = KEYEVENT_KEYUP;
-				event.native_vkey = cevent.Data.KeyUp.KeyCode;//cevent.GetKeyDown();
+				event.native_key_code = cevent.Data.KeyUp.KeyCode;//cevent.GetKeyDown();
 				//event.native_scancode = cevent.Data.KeyUp.KeyCode;
 				//event.y = 200;d
-				browser_source_ptr->SendKeyClick(&event, 2);
+				browser_source_ptr->SendKeyClick( event, 2);
 			}
 			break;
 		}
@@ -909,14 +911,14 @@ overflow: hidden; \
   EVENTFLAG_IS_REPEAT = 1 << 13,
 } cef_event_flags_t;
 				*/
-				obs_mouse_event event;
+				CefMouseEvent event;
 				event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
 				event.x = cevent.Data.MouseMove.PosX;
 				event.y = cevent.Data.MouseMove.PosY;
 				//printf("[x = %u][y = %u]\n", event.x, event.y);
 				//event.native_vkey = cevent.Data.MouseMove.PosX;//cevent.GetKeyDown();
 				//event.y = 200;
-				browser_source_ptr->SendMouseMove(&event, false);
+				browser_source_ptr->SendMouseMove( event, false);
 			}
 			break;
 		}
@@ -925,7 +927,7 @@ overflow: hidden; \
 			if (browser_source_ptr)
 			{
 
-				obs_mouse_event event;
+				CefMouseEvent event;
 				uint32_t type = 0;
 				/*
 				 MBT_LEFT = 0,
@@ -952,7 +954,7 @@ overflow: hidden; \
 				event.y = cevent.Data.MouseButton.PosY;
 				//event.native_vkey = cevent.Data.MouseMove.PosX;//cevent.GetKeyDown();
 				//event.y = 200;
-				browser_source_ptr->SendMouseClick(&event, type, false, 1);
+				browser_source_ptr->SendMouseClick( event, type, false, 1);
 			}
 			break;
 		}
@@ -961,7 +963,7 @@ overflow: hidden; \
 			if (browser_source_ptr)
 			{
 
-				obs_mouse_event event;
+				CefMouseEvent event;
 				uint32_t type = 0;
 				/*
 				 MBT_LEFT = 0,
@@ -988,7 +990,7 @@ overflow: hidden; \
 				event.y = cevent.Data.MouseButton.PosY;
 				//event.native_vkey = cevent.Data.MouseMove.PosX;//cevent.GetKeyDown();
 				//event.y = 200;
-				browser_source_ptr->SendMouseClick(&event, type, true, 1);
+				browser_source_ptr->SendMouseClick( event, type, true, 1);
 			}
 			break;
 		}
@@ -1016,13 +1018,13 @@ overflow: hidden; \
   EVENTFLAG_IS_REPEAT = 1 << 13,
 } cef_event_flags_t;
 				*/
-				obs_mouse_event event;
+				CefMouseEvent event;
 				event.modifiers = EVENTFLAG_MIDDLE_MOUSE_BUTTON;
 				event.x = cevent.Data.MouseWheel.PosX;
 				event.y = cevent.Data.MouseWheel.PosY;
 				//event.native_vkey = cevent.Data.MouseMove.PosX;//cevent.GetKeyDown();
 				//event.y = 200;
-				browser_source_ptr->SendMouseWheel(&event, (int)cevent.Data.MouseWheel.Delta, (int)cevent.Data.MouseWheel.Delta);
+				browser_source_ptr->SendMouseWheel(event, (int)cevent.Data.MouseWheel.Delta, (int)cevent.Data.MouseWheel.Delta);
 			}
 			break;
 		}
@@ -1091,24 +1093,31 @@ overflow: hidden; \
 	//	input_device_d d;
 		//Sleep(100);
 		chen::g_gpu_addresses_callback_ptr = callback;
-		chen::render_window_ptr.init(width, height, show);
-		
-		
-		browser_source_ptr = new BrowserSource();
+		 
+			std::string i_url = url;
+			uint32_t i_width = width;
+			uint32_t i_height = height;
+			bool i_show = show;
+
+			//std::this_thread::sleep_for(std::chrono::milliseconds(300));
+			chen::render_window_ptr.init(i_width, i_height, i_show);
+			 
+			browser_source_ptr = new BrowserSource();
 
 
-		
-		browser_source_ptr->width = width;
-		browser_source_ptr->height = height;
-		browser_source_ptr->canvas_fps = fps;
-		browser_source_ptr->is_showing = true;
-		printf("[%s][%d]\n", __FUNCTION__, __LINE__);
-		browser_source_ptr->url = url;
-		browser_source_ptr->CreateBrowser();
-		//	Sleep(10);
-		browser_source_ptr->SetActive(true);
-		browser_source_ptr->Refresh();
-		browser_source_ptr->SetShowing(true);
+
+			browser_source_ptr->width = width;
+			browser_source_ptr->height = height;
+			browser_source_ptr->canvas_fps = fps;
+			browser_source_ptr->is_showing = true;
+			printf("[%s][%d]\n", __FUNCTION__, __LINE__);
+			browser_source_ptr->url = i_url;
+			browser_source_ptr->CreateBrowser();
+			::Sleep(10);
+			browser_source_ptr->SetActive(true);
+			browser_source_ptr->Refresh();
+			browser_source_ptr->SetShowing(true);
+			//}).detach();
 		/*std::thread([=]() {
 			while (true)
 			{

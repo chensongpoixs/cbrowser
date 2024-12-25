@@ -42,13 +42,7 @@
     <ClCompile Include="browser-scheme.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="obs-browser-plugin.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="obs-browser-source.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="obs-browser-source-audio.cpp">
+    <ClCompile Include="cbrowser-source.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="crender_window.cpp">
@@ -86,7 +80,7 @@
     <ClInclude Include="cef-headers.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="obs-browser-source.hpp">
+    <ClInclude Include="cbrowser-source.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ComPtr.hpp">

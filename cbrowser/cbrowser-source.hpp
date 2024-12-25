@@ -15,8 +15,8 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-
-#pragma once
+#ifndef _C_BROWSER_SOURCE_H_
+#define _C_BROWSER_SOURCE_H_
 
 //#include <obs-module.h>
 
@@ -141,11 +141,11 @@ struct BrowserSource {
 	std::vector<obs_source_t *> audio_sources;
 	std::unordered_map<int, AudioStream> audio_streams;
 #endif
-	void SendMouseClick(const struct obs_mouse_event *event, int32_t type, bool mouse_up, uint32_t click_count);
-	void SendMouseMove(const struct obs_mouse_event *event, bool mouse_leave);
-	void SendMouseWheel(const struct obs_mouse_event *event, int x_delta, int y_delta);
+	void SendMouseClick(const CefMouseEvent&event, int32_t type, bool mouse_up, uint32_t click_count);
+	void SendMouseMove(const CefMouseEvent& event, bool mouse_leave);
+	void SendMouseWheel(const CefMouseEvent& event, int x_delta, int y_delta);
 	void SendFocus(bool focus);
-	void SendKeyClick(const struct obs_key_event *event, uint32_t in_event_type);
+	void SendKeyClick(const CefKeyEvent&event, uint32_t in_event_type);
 	void SetShowing(bool showing);
 	void SetActive(bool active);
 	void Refresh();
@@ -157,3 +157,6 @@ struct BrowserSource {
 	void SetBrowser(CefRefPtr<CefBrowser> b);
 	CefRefPtr<CefBrowser> GetBrowser();
 };
+
+
+#endif // _C_BROWSER_SOURCE_H_

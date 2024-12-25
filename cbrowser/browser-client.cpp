@@ -17,7 +17,7 @@
  ******************************************************************************/
 
 #include "browser-client.hpp"
-#include "obs-browser-source.hpp"
+#include "cbrowser-source.hpp"
 #include "base64.hpp"
 #include "crender_window.h"
 //#include <nlohmann/json.hpp>

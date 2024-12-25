@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "obs-browser-source.hpp"
+#include "cbrowser-source.hpp"
 #include "browser-client.hpp"
 #include "browser-scheme.hpp"
 #include "wide-string.hpp"
@@ -269,12 +269,12 @@ void BrowserSource::ClearAudioStreams()
 	});
 }
 #endif
-void BrowserSource::SendMouseClick(const struct obs_mouse_event *event, int32_t type, bool mouse_up,
+void BrowserSource::SendMouseClick(const CefMouseEvent& event, int32_t type, bool mouse_up,
 				   uint32_t click_count)
 {
-	uint32_t modifiers = event->modifiers;
-	int32_t x = event->x;
-	int32_t y = event->y;
+	uint32_t modifiers = event.modifiers;
+	int32_t x = event.x;
+	int32_t y = event.y;
 
 	ExecuteOnBrowser(
 		[=](CefRefPtr<CefBrowser> cefBrowser) {
@@ -288,11 +288,11 @@ void BrowserSource::SendMouseClick(const struct obs_mouse_event *event, int32_t 
 		true);
 }
 
-void BrowserSource::SendMouseMove(const struct obs_mouse_event *event, bool mouse_leave)
+void BrowserSource::SendMouseMove(const CefMouseEvent& event, bool mouse_leave)
 {
-	uint32_t modifiers = event->modifiers;
-	int32_t x = event->x;
-	int32_t y = event->y;
+	uint32_t modifiers = event.modifiers;
+	int32_t x = event.x;
+	int32_t y = event.y;
 
 	ExecuteOnBrowser(
 		[=](CefRefPtr<CefBrowser> cefBrowser) {
@@ -305,11 +305,11 @@ void BrowserSource::SendMouseMove(const struct obs_mouse_event *event, bool mous
 		true);
 }
 
-void BrowserSource::SendMouseWheel(const struct obs_mouse_event *event, int x_delta, int y_delta)
+void BrowserSource::SendMouseWheel(const CefMouseEvent& event, int x_delta, int y_delta)
 {
-	uint32_t modifiers = event->modifiers;
-	int32_t x = event->x;
-	int32_t y = event->y;
+	uint32_t modifiers = event.modifiers;
+	int32_t x = event.x;
+	int32_t y = event.y;
 
 	ExecuteOnBrowser(
 		[=](CefRefPtr<CefBrowser> cefBrowser) {
@@ -336,18 +336,18 @@ void BrowserSource::SendFocus(bool focus)
 		true);
 }
 
-void BrowserSource::SendKeyClick(const struct obs_key_event *event, uint32_t in_event_type)
+void BrowserSource::SendKeyClick(const CefKeyEvent&event, uint32_t in_event_type)
 {
 	if (destroying)
 		return;
 
-	std::string text = event->text;
+	char text = event.character;
 #ifdef __linux__
 	uint32_t native_vkey = KeyboardCodeFromXKeysym(event->native_vkey);
 	uint32_t modifiers = event->native_modifiers;
 #elif defined(_WIN32) || defined(__APPLE__)
-	uint32_t native_vkey = event->native_vkey;
-	uint32_t modifiers = event->modifiers;
+	uint32_t native_vkey = event.native_key_code;
+	uint32_t modifiers = event.modifiers;
 	uint32_t event_type = in_event_type;
 #else
 	uint32_t native_vkey = event->native_vkey;
