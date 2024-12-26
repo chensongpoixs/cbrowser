@@ -95,3 +95,8 @@
 /cbrowser/browser
 /app/cbrowser.dll
 /lib
+/11renderserver_browser.zip
+/11renderserver_browser/browser_capture_app.exe
+/11renderserver_browser/cbrowser.dll
+/11renderserver_browser/render_server.exe
+/Windows.UI.Composition-Win32-Samples

@@ -29,7 +29,7 @@
 #include <thread>
 #include <windows.h>
 #include <iostream>
-
+#include "cmediasoup_mgr.h"
 bool IsWindows11OrLater() {
 	DWORD dwMajorVersion = 0;
 	DWORD dwMinorVersion = 0;
@@ -58,15 +58,22 @@ int test_main() {
 	return 0;
 }
 
-
+void* g_address = NULL;
 
 static void _fuf(void* f)
 {
-	
+	g_address = f;
 }
 
+
+
+chen::cmediasoup_mgr* rtc_mgr = NULL;
 int main(int argc, char* argv[])
 {
+	rtc_mgr = new chen::cmediasoup_mgr();
+	rtc_mgr->init(0);
+	rtc_mgr->set_cinput_device_event_callback(&chen::input_device_event);
+	rtc_mgr->startup(argv[1], std::atoi(argv[2]), argv[3], argv[4]);
 	//test_main();
 	char czFileName[1024 * 4] = { 0 };
 	uint32_t length = GetModuleFileName(NULL, czFileName, _countof(czFileName) - 1);
@@ -82,9 +89,22 @@ int main(int argc, char* argv[])
 	//NORMAL_EX_LOG("[work_dir = %s]", czFileName);
 	std::string app_work = std::string(czFileName) + "\\cbrowser_render";
 	printf("app_work = %s\n", app_work.c_str());
-	std::string browser_config = std::string(czFileName) + "\\browser";
+	std::string browser_config = std::string(czFileName) + "\\browser\\" + argv[5];
 	chen::browser_init(app_work.c_str(), browser_config.c_str());
-	chen::browser_startup("http://map.baidu.com", 1920, 1080, 30, &_fuf, true);
+	chen::browser_startup("http://map.baidu.com", 1920, 1080, 30, &_fuf, std::atoi(argv[6]));
+
+
+
+	std::thread([=]() {
+		while (true)
+		{
+			if (g_address && rtc_mgr)
+			{
+				rtc_mgr->webrtc_texture(g_address, 87, 1920, 1080);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000/30));
+			}
+		}
+		}).detach();
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
