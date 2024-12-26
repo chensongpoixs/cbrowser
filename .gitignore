@@ -93,3 +93,5 @@
 /deps/Release.zip
 /app/app.vcxproj.user
 /cbrowser/browser
+/app/cbrowser.dll
+/lib

@@ -963,7 +963,7 @@ namespace chen {
 				 //self->hwnd_ = hWnd;
 				 self->_on_nc_create(cs);
 				 ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
-				 return DefWindowProc(hWnd, message, wParam, lParam);
+				// return DefWindowProc(hWnd, message, wParam, lParam);
 			 }
 			// return DefWindowProc(hWnd, mssag);
 			printf("[%s][%d]\n", __FUNCTION__, __LINE__);

@@ -29,7 +29,7 @@
 #include <thread>
 #include <windows.h>
 #include <iostream>
-
+#if 0
 bool IsWindows11OrLater() {
 	DWORD dwMajorVersion = 0;
 	DWORD dwMinorVersion = 0;
@@ -130,7 +130,7 @@ int test_window()
 	return EXIT_SUCCESS;
 }
 
-#if 0
+
 int main(int argc, char* argv[])
 //int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInstance, LPSTR lpCmdLine, int nCmdShow)
 {
