@@ -353,9 +353,11 @@ void BrowserClient::OnAcceleratedPaint(CefRefPtr<CefBrowser> cefbrowser, PaintEl
 		return;
 	}
 
-	
-	chen::render_window_ptr.OnAcceleratedPaint(cefbrowser, type, rect, info);
+	if (chen::render_window_ptr)
+	{
+		chen::render_window_ptr->OnAcceleratedPaint(cefbrowser, type, rect, info);
 
+	}
 	return;
 	if (!valid()) {
 		return;

@@ -85,7 +85,7 @@ namespace chen {
 		void update();
 		void destroy();
 	public:
-		static LRESULT WINAPI WindowProc(HWND hwnd,
+		static LRESULT CALLBACK WindowProc(HWND hwnd,
 			UINT msg,
 			WPARAM wparam,
 			LPARAM lparam);
@@ -112,23 +112,29 @@ namespace chen {
 		
 		void _on_paint();
 		bool _on_erase_bkgnd();
+
+
+		void _on_nc_create(LPCREATESTRUCT lpCreateStruct);
+		void _on_create(LPCREATESTRUCT lpCreateStruct);
+		//void _on_size();
 	private:
 
 
 		bool _is_mouse_event_from_touch(uint32_t message);
 
-	private:
+	public:
 
-		size_t width_, height_;
+		size_t width_ = 0, height_ = 0;
 
-		HWND hwnd_;
+		HWND hwnd_ = nullptr;
 		uint64_t start_time_ = 0;
 		bool mouse_rotation_ = false;
-		std::shared_ptr<d3d11::Device> device_;
-		std::shared_ptr<d3d11::SwapChain> swap_chain_;
-		std::shared_ptr<d3d11::Composition> composition_;
-		std::shared_ptr<BrowserLayer> browser_layer_;
-		std::shared_ptr<PopupLayer> popup_layer_;
+		bool called_enable_non_client_dpi_scaling_ = false;
+		std::shared_ptr<d3d11::Device> device_ = nullptr;
+		std::shared_ptr<d3d11::SwapChain> swap_chain_ = nullptr;
+		std::shared_ptr<d3d11::Composition> composition_ = nullptr;
+		std::shared_ptr<BrowserLayer> browser_layer_ = nullptr;
+		std::shared_ptr<PopupLayer> popup_layer_ = nullptr;
 
 		//DISALLOW_COPY_AND_ASSIGN(OsrRenderHandlerWinD3D11);
 	};
@@ -136,7 +142,7 @@ namespace chen {
 	//extern cmediasoup_mgr g_rtc_mgr;;
 
 	extern  set_gpu_addresses_callback     g_gpu_addresses_callback_ptr;
-	extern  crender_window  render_window_ptr;
+	extern  crender_window*  render_window_ptr;
 }
 
 

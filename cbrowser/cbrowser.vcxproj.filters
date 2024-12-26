@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="NewFilter1">
-      <UniqueIdentifier>{3b3a8610-8c7e-4d1e-a2c0-f8041c015d65}</UniqueIdentifier>
-    </Filter>
     <Filter Include="render">
       <UniqueIdentifier>{78e16756-f3b1-4d95-882a-2897598b8d84}</UniqueIdentifier>
     </Filter>
@@ -56,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="cutil_win.cpp">
       <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

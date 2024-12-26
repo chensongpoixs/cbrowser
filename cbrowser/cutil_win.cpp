@@ -62,9 +62,9 @@ namespace chen {
         return old;
     }
 
-    std::wstring GetResourceString(UINT id) {
+    std::string GetResourceString(UINT id) {
 #define MAX_LOADSTRING 100
-        TCHAR buff[MAX_LOADSTRING] = { 0 };
+        CHAR buff[MAX_LOADSTRING] = { 0 };
         LoadString(::GetModuleHandle(nullptr), id, buff, MAX_LOADSTRING);
         return buff;
     }

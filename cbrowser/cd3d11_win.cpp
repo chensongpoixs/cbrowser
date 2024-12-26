@@ -307,7 +307,7 @@ namespace chen {
             : device_(to_com_ptr(pdev)), ctx_(std::make_shared<Context>(pctx))
             , pSharedHandle(NULL)
         {
-            lib_compiler_ = LoadLibrary(L"d3dcompiler_47.dll");
+            lib_compiler_ = LoadLibrary("d3dcompiler_47.dll");
         }
 
         // static

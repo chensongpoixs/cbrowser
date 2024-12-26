@@ -30,11 +30,59 @@
 #include "crender_browser.h"
 #include "cutil_win.h"
 #include "cbrowser-source.hpp"
+#include <shellscalingapi.h>
 namespace chen {
 	//cmediasoup_mgr g_rtc_mgr;;
 	set_gpu_addresses_callback     g_gpu_addresses_callback_ptr = NULL;;
-	crender_window  render_window_ptr;
-	const wchar_t kD3DClassName[] = L"browser_render";
+	crender_window * render_window_ptr = NULL;
+	const char kD3DClassName[] = "browser_render";
+
+
+
+	// Returns true if the process is per monitor DPI aware.
+	bool IsProcessPerMonitorDpiAware() {
+		enum class PerMonitorDpiAware {
+			UNKNOWN = 0,
+			PER_MONITOR_DPI_UNAWARE,
+			PER_MONITOR_DPI_AWARE,
+		};
+		static PerMonitorDpiAware per_monitor_dpi_aware = PerMonitorDpiAware::UNKNOWN;
+		if (per_monitor_dpi_aware == PerMonitorDpiAware::UNKNOWN) {
+			per_monitor_dpi_aware = PerMonitorDpiAware::PER_MONITOR_DPI_UNAWARE;
+			HMODULE shcore_dll = ::LoadLibrary("shcore.dll");
+			if (shcore_dll) {
+				typedef HRESULT(WINAPI* GetProcessDpiAwarenessPtr)(
+					HANDLE, PROCESS_DPI_AWARENESS*);
+				GetProcessDpiAwarenessPtr func_ptr =
+					reinterpret_cast<GetProcessDpiAwarenessPtr>(
+						::GetProcAddress(shcore_dll, "GetProcessDpiAwareness"));
+				if (func_ptr) {
+					PROCESS_DPI_AWARENESS awareness;
+					if (SUCCEEDED(func_ptr(nullptr, &awareness)) &&
+						awareness == PROCESS_PER_MONITOR_DPI_AWARE) {
+						per_monitor_dpi_aware = PerMonitorDpiAware::PER_MONITOR_DPI_AWARE;
+					}
+				}
+			}
+		}
+		return per_monitor_dpi_aware == PerMonitorDpiAware::PER_MONITOR_DPI_AWARE;
+	}
+	// DPI value for 1x scale factor.
+#define DPI_1X 96.0f
+
+	float GetWindowScaleFactor(HWND hwnd) {
+		if (hwnd && IsProcessPerMonitorDpiAware()) {
+			typedef UINT(WINAPI* GetDpiForWindowPtr)(HWND);
+			static GetDpiForWindowPtr func_ptr = reinterpret_cast<GetDpiForWindowPtr>(
+				GetProcAddress(GetModuleHandle("user32.dll"), "GetDpiForWindow"));
+			if (func_ptr) {
+				return static_cast<float>(func_ptr(hwnd)) / DPI_1X;
+			}
+		}
+
+		return GetDeviceScaleFactor();
+	}
+
 	BrowserLayer::BrowserLayer(const std::shared_ptr<d3d11::Device>& device)
 		: d3d11::Layer(device, false /* flip */) {
 		frame_buffer_ = std::make_shared<d3d11::FrameBuffer>(device_);
@@ -123,24 +171,74 @@ namespace chen {
 
 	bool crender_window::init(int32_t width, int32_t height, bool show)
 	{
-		const cef_color_t background_color = MainContext::Get()->GetBackgroundColor();
+		const cef_color_t background_color = 0;// MainContext::Get()->GetBackgroundColor();
 		const HBRUSH background_brush = CreateSolidBrush(
 			RGB(CefColorGetR(background_color), CefColorGetG(background_color),
 				CefColorGetB(background_color)));
 
 		static ATOM wc_atom = 0;
-		if (wc_atom == 0) {
-			/*WNDCLASSA wc = {};
+		if (wc_atom == 0)
+		{
+		
+			//RTC_DCHECK(wnd_class_ != 0);
+		//	return wnd_class_ != 0;
 
-			wc.style = CS_HREDRAW | CS_VREDRAW;
-			wc.lpfnWndProc = WindowProc;
-			wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-			wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
-			wc.lpszClassName = kD3DClassName;
+#if 1
+			//WNDCLASSA wc = {};
+			////wc.cbSize = sizeof(WNDCLASSEX);
+			//wc.style = NULL;// CS_HREDRAW | CS_VREDRAW;
+			//wc.lpfnWndProc = WindowProc;
+			//wc.hCursor = LoadCursor(NULL, IDC_ARROW);;// LoadCursor(::GetModuleHandle(nullptr), MAKEINTRESOURCE(IDC_ARROW));
+			////wc.hCursor = LoadCursor(::GetModuleHandle(nullptr), MAKEINTRESOURCE(230));
+			//wc.hbrBackground = (HBRUSH)GetStockObject(COLOR_APPWORKSPACE);//reinterpret_cast<HBRUSH>(COLOR_WINDOW);
+			//wc.lpszClassName = kD3DClassName;
+			//wc.hIcon = LoadIcon(::GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APPLICATION));
+			//
+			WNDCLASSEX wcex;
+			wcex.cbSize = sizeof(WNDCLASSEX);
+			wcex.style = CS_HREDRAW | CS_VREDRAW;
+			wcex.lpfnWndProc = WindowProc;
+			wcex.cbClsExtra = 0;
+			wcex.cbWndExtra = 0;
+			wcex.hInstance = ::GetModuleHandle(nullptr);
+			wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION); //(HICON)LoadImage(hInstance, "bullet_ico.ico", IMAGE_ICON, 0,0, LR_LOADTRANSPARENT);//LR_LOADFROMFILE);
+			wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+			wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+			wcex.lpszMenuName = 0;
+			wcex.lpszClassName = kD3DClassName;
+			wcex.hIconSm = 0;
+			wc_atom = RegisterClassEx(&wcex);
+			//wc_atom = RegisterClass(&wc);
+		//	  WNDCLASSA wc = {};
 
-			wc_atom = RegisterClassA(&wc);*/
+		//	wc.style = CS_HREDRAW | CS_VREDRAW;
+		////	wc.style = CS_OWNDC;
+		//	wc.lpfnWndProc = WindowProc;
+		//	wc.cbClsExtra = 0;
+		//	wc.cbWndExtra = 0;
+		//	wc.hInstance = ::GetModuleHandle(nullptr);
+		//	wc.hIcon = nullptr;
+		//	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		//	wc.hbrBackground = background_brush;
+		//	wc.lpszMenuName = nullptr;
+		//	wc.lpszClassName = kD3DClassName;
+		//	wc.lpfnWndProc = WindowProc;
+		//	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		//	wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
+		//	//wc.lpszClassName = kD3DClassName;
 
-
+		//	wc_atom = RegisterClassA(&wc); 
+#else 
+			WNDCLASSEXW wcex = { sizeof(WNDCLASSEX) };
+			wcex.style = CS_DBLCLKS;
+			wcex.hInstance = GetModuleHandle(NULL);
+			wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+			wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+			wcex.lpfnWndProc = WindowProc;
+			wcex.lpszClassName = L"browser_render";
+			wc_atom = ::RegisterClassExW(&wcex);
+#endif 
+#if 0
 			WNDCLASSEX wcex;
 
 			wcex.cbSize = sizeof(WNDCLASSEX);
@@ -154,33 +252,101 @@ namespace chen {
 			wcex.hbrBackground = background_brush;
 			wcex.lpszMenuName = nullptr;
 			wcex.lpszClassName = kD3DClassName;
-			wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+			//wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 			RegisterClassEx(&wcex);
+#endif 
 			if (wc_atom == 0)
+			{
 				return false;
+			}
 		}
 		width_ = width;
 		height_ = height;
-		DWORD ex_style = 0;
-		if (GetWindowLongPtr(parent_hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE) {
-			// Don't activate the browser window on creation.
-			ex_style |= WS_EX_NOACTIVATE;
+		DWORD ex_style = WS_POPUP;
+		//return  true;
+		//if (GetWindowLongPtr(parent_hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE) {
+		//	// Don't activate the browser window on creation.
+		//	ex_style |= WS_EX_NOACTIVATE;
+		//}
+#if 1
+
+		RECT clientSize;
+		clientSize.top = 0;
+		clientSize.left = 0;
+		clientSize.right = width_;
+		clientSize.bottom = height_;
+		//ex_style = WS_SYSMENU | WS_BORDER | WS_CAPTION | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SIZEBOX;
+		AdjustWindowRect(&clientSize, ex_style, false);
+		hwnd_ = CreateWindow(kD3DClassName, "render", ex_style/*WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN*/, 0, 0,
+		 	static_cast<int>(width_), static_cast<int>(height_),
+			NULL, NULL, ::GetModuleHandle(nullptr), this);
+		printf("hwnd_ = %p \n", hwnd_);
+		/*
+		if (!called_enable_non_client_dpi_scaling_ && IsProcessPerMonitorDpiAware()) {
+			// This call gets Windows to scale the non-client area when WM_DPICHANGED
+			// is fired on Windows versions < 10.0.14393.0.
+			// Derived signature; not available in headers.
+			typedef LRESULT(WINAPI* EnableChildWindowDpiMessagePtr)(HWND, BOOL);
+			static EnableChildWindowDpiMessagePtr func_ptr =
+				reinterpret_cast<EnableChildWindowDpiMessagePtr>(GetProcAddress(
+					GetModuleHandle("user32.dll"), "EnableChildWindowDpiMessage"));
+			if (func_ptr) {
+				func_ptr(hwnd_, TRUE);
+			}
 		}
-		hwnd_ = CreateWindowEx(kD3DClassName, "render", WS_OVERLAPPEDWINDOW, 0, 0,
-			static_cast<int>(width_), static_cast<int>(height_),
-			NULL, NULL, NULL, NULL);
+		
+		*/
+#else 
+		hwnd_ =
+			::CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, L"browser_render", L"browser_render",
+				WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN,
+				CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+				CW_USEDEFAULT, NULL, NULL, GetModuleHandle(NULL), this);
+
+#endif // 
+		
+		if (show)
+		{
+			::ShowWindow(hwnd_, SW_SHOW);
+			//::ShowWindow(hwnd_, SW_SHOWACTIVE);
+		}
+		else
+		{
+			::ShowWindow(hwnd_, SW_SHOW);
+			::ShowWindow(hwnd_, SW_HIDE);
+		}
+		::UpdateWindow(hwnd_);
+
+
+	/*	std::thread([=]() {
+				MSG msg;
+				while (GetMessage(&msg, NULL, 0, 0))
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+			}).detach();*/
+	/*	LONG dwNewLong = GetWindowLong(hwnd_, GWL_EXSTYLE);
+		dwNewLong |= WS_EX_TRANSPARENT | WS_EX_LAYERED;
+		SetWindowLong(hwnd_, GWL_EXSTYLE, dwNewLong);*/
+		/*::SendMessage(hwnd_, WM_SETFONT, reinterpret_cast<WPARAM>(reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT))),
+			TRUE);*/
 		// Create a D3D11 device instance.
 		device_ = d3d11::Device::create();
 		//DCHECK(device_);
-		if (!device_) {
+		if (!device_) 
+		{
+			printf("create 3D render failed !!!\n");
 			return false;
 		}
 
 		// Create a D3D11 swapchain for the window.
 		swap_chain_ = device_->create_swapchain(hwnd_);
 		//DCHECK(swap_chain_);
-		if (!swap_chain_) {
+		if (!swap_chain_) 
+		{
+			printf("create 3D render  swap failed !!!\n");
 			return false;
 		}
 
@@ -196,15 +362,7 @@ namespace chen {
 
 		start_time_ = GetTimeNow();
 		
-		if (show)
-		{
-			::ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
-		}
-		else
-		{
-			::ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
-			::ShowWindow(hwnd_, SW_HIDE);
-		}
+	
 		device_->create_shared_texture(DXGI_FORMAT_B8G8R8A8_UNORM, width, height);
 		printf("[%s][%d][g_gpu_addresses_callback_ptr = %p][pSharedHandle = %p]\n", 
 			__FUNCTION__, __LINE__, g_gpu_addresses_callback_ptr , device_->pSharedHandle);
@@ -231,11 +389,15 @@ namespace chen {
 
 	void crender_window::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type, const CefRenderHandler::RectList& dirtyRects, const CefAcceleratedPaintInfo& info)
 	{
-		if (type == PET_POPUP) {
+		//return;
+		if (type == PET_POPUP) 
+		{
+			return ;
 			popup_layer_->on_paint(info.shared_texture_handle);
 			
 		}
-		else {
+		else 
+		{
 			browser_layer_->on_paint(info.shared_texture_handle);
 			
 		}
@@ -283,7 +445,10 @@ namespace chen {
 
 	void crender_window::_on_mouse_event(UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		if (_is_mouse_event_from_touch(message)) {
+		printf("[%s][%d]\n", __FUNCTION__, __LINE__);
+		if (_is_mouse_event_from_touch(message)) 
+		{
+
 			return;
 		}
 
@@ -480,7 +645,9 @@ namespace chen {
 		} break;
 
 		case WM_MOUSEWHEEL:
-			if (browser_source_ptr) {
+			if (browser_source_ptr)
+			{
+				printf("[WM_MOUSEWHEEL]\n");
 				POINT screen_point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 				HWND scrolled_wnd = ::WindowFromPoint(screen_point);
 				if (scrolled_wnd != hwnd_) {
@@ -499,6 +666,10 @@ namespace chen {
 				browser_source_ptr->SendMouseWheel(mouse_event,
 					IsKeyDown(VK_SHIFT) ? delta : 0,
 					!IsKeyDown(VK_SHIFT) ? delta : 0);
+			}
+			else
+			{
+				printf("[WM_MOUSEWHEEL]!!! failed \n");
 			}
 			break;
 		}
@@ -604,6 +775,120 @@ namespace chen {
 		return  browser_source_ptr == nullptr ;
 	}
 
+	void crender_window::_on_nc_create(LPCREATESTRUCT lpCreateStruct)
+	{
+		if (IsProcessPerMonitorDpiAware()) {
+			// This call gets Windows to scale the non-client area when WM_DPICHANGED
+			// is fired on Windows versions >= 10.0.14393.0.
+			typedef BOOL(WINAPI* EnableNonClientDpiScalingPtr)(HWND);
+			static EnableNonClientDpiScalingPtr func_ptr =
+				reinterpret_cast<EnableNonClientDpiScalingPtr>(GetProcAddress(
+					GetModuleHandle("user32.dll"), "EnableNonClientDpiScaling"));
+			called_enable_non_client_dpi_scaling_ = !!(func_ptr && func_ptr(hwnd_));
+		}
+	}
+
+	void crender_window::_on_create(LPCREATESTRUCT lpCreateStruct)
+	{
+		const HINSTANCE hInstance = lpCreateStruct->hInstance;
+
+		RECT rect;
+		GetClientRect(hwnd_, &rect);
+
+		//if (with_controls_) {
+		//	// Create the child controls.
+		//	int x_offset = 0;
+
+		//	const int button_width = GetButtonWidth(hwnd_);
+		//	const int urlbar_height = GetURLBarHeight(hwnd_);
+
+		//	back_hwnd_ = CreateWindow(
+		//		L"BUTTON", L"Back", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+		//		x_offset, 0, button_width, urlbar_height, hwnd_,
+		//		reinterpret_cast<HMENU>(IDC_NAV_BACK), hInstance, nullptr);
+		//	CHECK(back_hwnd_);
+		//	x_offset += button_width;
+
+		//	forward_hwnd_ = CreateWindow(
+		//		L"BUTTON", L"Forward",
+		//		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, 0,
+		//		button_width, urlbar_height, hwnd_,
+		//		reinterpret_cast<HMENU>(IDC_NAV_FORWARD), hInstance, nullptr);
+		//	CHECK(forward_hwnd_);
+		//	x_offset += button_width;
+
+		//	reload_hwnd_ = CreateWindow(
+		//		L"BUTTON", L"Reload",
+		//		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, 0,
+		//		button_width, urlbar_height, hwnd_,
+		//		reinterpret_cast<HMENU>(IDC_NAV_RELOAD), hInstance, nullptr);
+		//	CHECK(reload_hwnd_);
+		//	x_offset += button_width;
+
+		//	stop_hwnd_ = CreateWindow(
+		//		L"BUTTON", L"Stop", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+		//		x_offset, 0, button_width, urlbar_height, hwnd_,
+		//		reinterpret_cast<HMENU>(IDC_NAV_STOP), hInstance, nullptr);
+		//	CHECK(stop_hwnd_);
+		//	x_offset += button_width;
+
+		//	edit_hwnd_ =
+		//		CreateWindow(L"EDIT", nullptr,
+		//			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT |
+		//			ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_DISABLED,
+		//			x_offset, 0, rect.right - button_width * 4, urlbar_height,
+		//			hwnd_, nullptr, hInstance, nullptr);
+		//	CHECK(edit_hwnd_);
+
+		//	// Override the edit control's window procedure.
+		//	edit_wndproc_old_ = SetWndProcPtr(edit_hwnd_, EditWndProc);
+
+		//	// Associate |this| with the edit window.
+		//	SetUserDataPtr(edit_hwnd_, this);
+
+		//	rect.top += urlbar_height;
+
+		//	if (!with_osr_) {
+		//		// Remove the menu items that are only used with OSR.
+		//		HMENU hMenu = ::GetMenu(hwnd_);
+		//		if (hMenu) {
+		//			HMENU hTestMenu = ::GetSubMenu(hMenu, 2);
+		//			if (hTestMenu) {
+		//				::RemoveMenu(hTestMenu, ID_TESTS_OSR_FPS, MF_BYCOMMAND);
+		//				::RemoveMenu(hTestMenu, ID_TESTS_OSR_DSF, MF_BYCOMMAND);
+		//			}
+		//		}
+		//	}
+		//}
+		//else {
+			// No controls so also remove the default menu.
+			::SetMenu(hwnd_, nullptr);
+		//}
+
+		const float device_scale_factor = GetWindowScaleFactor(hwnd_);
+
+		/*if (with_osr_) {
+			browser_window_->SetDeviceScaleFactor(device_scale_factor);
+		}*/
+
+		//if (!is_popup_) {
+		//	// Create the browser window.
+		//	CefRect cef_rect(rect.left, rect.top, rect.right - rect.left,
+		//		rect.bottom - rect.top);
+		//	browser_window_->CreateBrowser(hwnd_, cef_rect, browser_settings_, nullptr,
+		//		delegate_->GetRequestContext());
+		//}
+		//else 
+		{
+			// With popups we already have a browser window. Parent the browser window
+			// to the root window and show it in the correct location.
+			//browser_window_->ShowPopup(hwnd_, rect.left, rect.top,
+			//	rect.right - rect.left, rect.bottom - rect.top);
+		}
+
+		//window_created_ = true;
+	}
+
 	bool crender_window::_is_mouse_event_from_touch(uint32_t message)
 	{
 		// Helper function to detect mouse messages coming from emulation of touch
@@ -615,25 +900,159 @@ namespace chen {
 	}
 
 
-	LRESULT WINAPI crender_window::WindowProc(HWND hWnd,
+	LRESULT  CALLBACK crender_window::WindowProc(HWND hWnd,
 		UINT message,
 		WPARAM wParam,
-		LPARAM lParam) {
-		/*if (msg == WM_DESTROY || (msg == WM_CHAR && wparam == VK_RETURN)) {
-			PostQuitMessage(0);
+		LPARAM lParam) 
+	{
+		if (message != WM_PAINT)
+		{
+			printf("[%s][%d][hWnd = %p][message = %u]\n", __FUNCTION__, __LINE__, hWnd, message);
+		}
+		
+		if (message == WM_GETMINMAXINFO)
+		{
+			MINMAXINFO* pMinMaxInfo = (MINMAXINFO*)lParam;
+			pMinMaxInfo->ptMinTrackSize.x = 200; // 最小宽度
+			pMinMaxInfo->ptMinTrackSize.y = 100; // 最小高度
+			pMinMaxInfo->ptMaxTrackSize.x = 1920; // 最大宽度
+			pMinMaxInfo->ptMaxTrackSize.y = 1080; // 最大高度
 			return 0;
 		}
 
-		return DefWindowProcA(hwnd, msg, wparam, lparam);*/
-		crender_window* self = reinterpret_cast<crender_window*>(GetWindowLongPtr (hWnd, GWLP_USERDATA));
-		if (!self) 
+		//if (message == WM_DESTROY || (message == WM_CHAR && message == VK_RETURN)) {
+		//	PostQuitMessage(0);
+		//	return 0;
+		//}
+		crender_window* self = NULL;
+		/*if (message != WM_NCCREATE) {
+			self = GetUserDataPtr<crender_window*>(hWnd);
+			if (!self) {
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+			DCHECK_EQ(hWnd, self->hwnd_);
+		}*/
+		
+		//return DefWindowProc(hWnd, message, wParam, lParam);
+		//crender_window* 
+		self = reinterpret_cast<crender_window*>(GetWindowLongPtr (hWnd, GWLP_USERDATA));
+		//return 0;
+		//crender_window* me =
+		//	reinterpret_cast<crender_window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA))
+		/*
+		* // 创建窗口会发送三个事件
+		[chen::crender_window::WindowProc][689][hWnd = 000000000005207C][message = 36] ==> WM_GETMINMAXINFO
+		[chen::crender_window::WindowProc][689][hWnd = 000000000005207C][message = 129] ==> WM_NCCREATE
+		[chen::crender_window::WindowProc][689][hWnd = 000000000005207C][message = 130]
+		*/
+		if (!self && (/* WM_CREATE == message */  WM_NCCREATE == message ))
 		{
+		 	CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+			 self = reinterpret_cast<crender_window*>(cs->lpCreateParams);
+			 if (!self)
+			 {
+				 printf("[%s][%d]!self\n", __FUNCTION__, __LINE__);
+				 return DefWindowProc(hWnd, message, wParam, lParam);
+				
+			 }
+			 else
+			 {
+				 self->hwnd_ = hWnd;
+				 // Associate |self| with the main window.
+				 //SetUserDataPtr(hWnd, self);
+				 //self->hwnd_ = hWnd;
+				 self->_on_nc_create(cs);
+				 ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
+				 return DefWindowProc(hWnd, message, wParam, lParam);
+			 }
+			// return DefWindowProc(hWnd, mssag);
 			printf("[%s][%d]\n", __FUNCTION__, __LINE__);
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			
 		}
-
+		else if (!self )
+		{
+			printf("[%s][%d]!self\n", __FUNCTION__, __LINE__);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+			return 0;
+		}
+		/*
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 36]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 129]
+[chen::crender_window::WindowProc][903]!self
+[chen::crender_window::WindowProc][914]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 131]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 1]
+ 
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 24] = > WM_QUIT
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 70] => WM_WINDOWPOSCHANGING => SetWindowPos
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 133]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 20]  => WM_Close
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 71] = > WM_WINDOWPOSCHANGING
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 127] => WM_NCXBUTTONDOWN
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 127]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 127]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 5]
+[chen::crender_window::WindowProc][862][hWnd = 00000000000925E6][message = 3]
+																		  136 ==> WM_SYNCPAINT
+		
+		*/
 		// We want to handle IME events before the OS does any default handling.
-		switch (message) {
+		switch (message) 
+		{
+		case WM_CREATE:
+		{
+			self->_on_create(reinterpret_cast<CREATESTRUCT*>(lParam));
+			break;
+		}
+		case WM_QUIT:
+		{
+			return 0;
+			break;
+		}
+		case WM_CLOSE: // 20
+		{
+			break;
+		}
+		case WM_SYNCPAINT:
+		{
+			break;
+		}
+		case WM_NCXBUTTONDOWN:
+		{
+			uint32_t xPos = GET_X_LPARAM(lParam);
+			uint32_t yPos = GET_Y_LPARAM(lParam);
+			break;
+		}
+		/*case WM_SIZE:
+		{
+		
+			break;
+		}*/
+		case WM_WINDOWPOSCHANGING:
+		case WM_WINDOWPOSCHANGED:
+		{
+		
+			// Retrieve current window placement information.
+			//WINDOWPLACEMENT placement;
+			//::GetWindowPlacement(self->hwnd_, &placement);
+
+			//// Retrieve information about the display that contains the window.
+			//HMONITOR monitor =
+			//	MonitorFromRect(&placement.rcNormalPosition, MONITOR_DEFAULTTONEAREST);
+			//MONITORINFO info;
+			//info.cbSize = sizeof(info);
+			//GetMonitorInfo(monitor, &info);
+
+			//// Make sure the window is inside the display.
+			//CefRect display_rect(info.rcWork.left, info.rcWork.top,
+			//	info.rcWork.right - info.rcWork.left,
+			//	info.rcWork.bottom - info.rcWork.top);
+			//CefRect window_rect(0, 0, 1920, 1080);
+			////WindowTestRunner::ModifyBounds(display_rect, window_rect);
+			//SetWindowPos(self->hwnd_, nullptr, window_rect.x, window_rect.y,
+			//	window_rect.width, window_rect.height, SWP_NOZORDER);
+			break;
+		}
 		case WM_IME_SETCONTEXT:
 		{
 			// We handle the IME Composition Window ourselves (but let the IME Candidates
@@ -643,7 +1062,21 @@ namespace chen {
 			::DefWindowProc(hWnd, message, wParam, lParam);
 			return 0;
 		}
-			 
+		//  TODO@chensong 2024-12-26   处理游标消息，不处理就会一直转圈	 
+		case WM_SETCURSOR:
+		{
+			//switch (LOWORD(lParam))
+			//{
+			//default:
+			//	::SetCursor(LoadCursor(NULL, IDC_ARROW));
+			//	break;
+			//}
+
+
+			uint32_t xPos = GET_X_LPARAM(lParam);
+			uint32_t yPos = GET_Y_LPARAM(lParam);
+			break;
+		}
 		case WM_IME_STARTCOMPOSITION:
 		{
 			//self->OnIMEStartComposition();
@@ -691,8 +1124,10 @@ namespace chen {
 		case WM_MOUSEMOVE:
 		case WM_MOUSELEAVE:
 		case WM_MOUSEWHEEL:
+		{
 			self->_on_mouse_event(message, wParam, lParam);
 			break;
+		}
 
 		case WM_SIZE:
 			self->_on_size();
@@ -718,6 +1153,7 @@ namespace chen {
 			break;
 
 		case WM_PAINT:
+		case WM_NCPAINT: // 133
 			self->_on_paint();
 			return 0;
 
@@ -740,13 +1176,19 @@ namespace chen {
 			break;
 
 		case WM_NCDESTROY:
-			// Clear the reference to |self|.
-			SetUserDataPtr(hWnd, nullptr);
-			self->hwnd_ = nullptr;
-			break;
+			{
+				// Clear the reference to |self|.
+				SetUserDataPtr(hWnd, nullptr);
+				self->hwnd_ = nullptr;
+				break;
+			}
+			default:
+			{
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
 		}
-
 		return DefWindowProc(hWnd, message, wParam, lParam);
+		return true;
 	}
 }
  

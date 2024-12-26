@@ -1060,7 +1060,7 @@ overflow: hidden; \
 
 	void browser_init(const char* work_app, const char* browser_config_path)
 	{
-
+		printf("[%s][%d]\n", __FUNCTION__, __LINE__);
 		g_work_app = work_app;
 		g_browser_config_path = browser_config_path;
 	/*	obs_module_load();
@@ -1068,10 +1068,10 @@ overflow: hidden; \
 		
 		obs_browser_initialize();*/
 
-
+		printf("[%s][%d]\n", __FUNCTION__, __LINE__);
 		obs_module_load();
 
-
+		printf("[%s][%d]\n", __FUNCTION__, __LINE__);
 		obs_browser_initialize();
 		//Sleep(100);
 		//chen::g_rtc_mgr.init(0);
@@ -1101,7 +1101,7 @@ overflow: hidden; \
 		//Sleep(100);
 		//chen::g_rtc_mgr.init(0);
 
-
+		printf("[%s][%d]\n", __FUNCTION__, __LINE__);
 
 		//chen::render_window_ptr.init(1920, 1080);
 
@@ -1121,7 +1121,8 @@ overflow: hidden; \
 			bool i_show = show;
 
 			//std::this_thread::sleep_for(std::chrono::milliseconds(300));
-			chen::render_window_ptr.init(i_width, i_height, i_show);
+			chen::render_window_ptr = new crender_window();
+			chen::render_window_ptr->init(i_width, i_height, i_show);
 			 
 			browser_source_ptr = new BrowserSource();
 
@@ -1138,6 +1139,7 @@ overflow: hidden; \
 			browser_source_ptr->SetActive(true);
 			browser_source_ptr->Refresh();
 			browser_source_ptr->SetShowing(true);
+		
 			//}).detach();
 		/*std::thread([=]() {
 			while (true)

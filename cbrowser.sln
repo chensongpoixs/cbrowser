@@ -8,6 +8,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cbrowser_render", "cbrowser_render\cbrowser_render.vcxproj", "{E7F355BE-B78B-4BE5-851E-6D3E11A92733}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app", "app\app.vcxproj", "{BF399A51-AB59-4038-BB9A-32EAD76B9683}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0F8E946E-E750-484F-AED3-BC575F4595FB} = {0F8E946E-E750-484F-AED3-BC575F4595FB}
+		{E7F355BE-B78B-4BE5-851E-6D3E11A92733} = {E7F355BE-B78B-4BE5-851E-6D3E11A92733}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

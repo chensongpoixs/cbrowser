@@ -50,7 +50,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -78,8 +78,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\deps\cef_binary_6533_windows_x64\;..\deps\librtc\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\deps\librtc\lib\x64\Release;..\deps\cef_binary_6533_windows_x64\Release;..\deps\cef_binary_6533_windows_x64\build\libcef_dll_wrapper\Release;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)lib\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>..\vsout\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>..\vsout\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,7 +127,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);CEF_USE_ATL;WIN32;_WINDOWS;NDEBUG;ENABLE_BROWSER_SHARED_TEXTURE;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;ENABLE_HEVC;HAVE_OBSCONFIG_H;BROWSER_AVAILABLE;QT_WIDGETS_LIB;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;QT_GUI_LIB;CMAKE_INTDIR="Release";obs_browser_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);CEF_USE_ATL;WIN32;_WINDOWS;NDEBUG;ENABLE_BROWSER_SHARED_TEXTURE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;ENABLE_HEVC;HAVE_OBSCONFIG_H;BROWSER_AVAILABLE;QT_WIDGETS_LIB;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;QT_GUI_LIB;CMAKE_INTDIR="Release";obs_browser_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -150,6 +150,7 @@
     <ClCompile Include="crender_window.cpp" />
     <ClCompile Include="cutil_win.cpp" />
     <ClCompile Include="cbrowser-source.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="signal-restore.cpp" />
     <ClCompile Include="wide-string.cpp" />
   </ItemGroup>

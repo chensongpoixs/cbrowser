@@ -21,7 +21,7 @@
 			沿着自己的回忆，一个个的场景忽闪而过，最后发现，我的本心，在我写代码的时候，会回来。
 			安静，淡然，代码就是我的一切，写代码就是我本心回归的最好方式，我还没找到本心猎手，但我相信，顺着这个线索，我一定能顺藤摸瓜，把他揪出来。
 ************************************************************************************************/
- 
+
 
 #include <iostream>
 #include "crender_browser.h"
@@ -62,11 +62,79 @@ int test_main() {
 
 static void _fuf(void* f)
 {
-	
+
 }
 
-int main(int argc, char* argv[])
+
+LRESULT CALLBACK  WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
+	printf("[%s][%d][hWnd = %p][message = %u]\n", __FUNCTION__, __LINE__, hWnd, Message);
+	switch (Message)
+	{
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		break;
+	}
+	default:
+	{
+		return DefWindowProc(hWnd, Message, wParam, lParam);
+		//break;
+	}
+	}
+	return 0;
+
+}
+
+
+int test_window()
+{
+	MSG msg;
+	HWND hWnd;
+	WNDCLASS wc;
+	wc.style = CS_HREDRAW | CS_VREDRAW;
+	wc.lpfnWndProc = WndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = ::GetModuleHandle(nullptr);
+	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = "WindowClass";
+
+	// 
+	if (!RegisterClass(&wc))
+	{
+		MessageBox(NULL, "Window resiter failed !!!", "Error !!!", MB_ICONEXCLAMATION | MB_OK);
+	}
+
+
+	hWnd = CreateWindow("WindowClass", "first window", WS_VISIBLE | WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, ::GetModuleHandle(nullptr), NULL);
+
+	printf("[%s][%d][hWnd = %p] \n", __FUNCTION__, __LINE__, hWnd);
+
+	::ShowWindow(hWnd, SW_SHOW);
+	::UpdateWindow(hWnd);
+	 
+	   while (GetMessage(&msg, NULL, 0, 0))
+	   {
+		   TranslateMessage(&msg);
+		   DispatchMessage(&msg);
+	   } 
+
+
+
+
+	return EXIT_SUCCESS;
+}
+
+#if 0
+int main(int argc, char* argv[])
+//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	
 	//test_main();
 	char czFileName[1024 * 4] = { 0 };
 	uint32_t length = GetModuleFileName(NULL, czFileName, _countof(czFileName) - 1);
@@ -78,8 +146,8 @@ int main(int argc, char* argv[])
 			czFileName[i] = '\\';
 		}
 	}
-//	debug TODO@chensong 202412-22  cef 必须是 \\目录
-	//NORMAL_EX_LOG("[work_dir = %s]", czFileName);
+	//	debug TODO@chensong 202412-22  cef 必须是 \\目录
+		//NORMAL_EX_LOG("[work_dir = %s]", czFileName);
 	std::string app_work = std::string(czFileName) + "\\cbrowser_render";
 	printf("app_work = %s\n", app_work.c_str());
 	std::string browser_config = std::string(czFileName) + "\\browser";
@@ -92,7 +160,18 @@ int main(int argc, char* argv[])
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	
 
+
+	while (true)
+	{
+		Sleep(3);
+	}
 	return 0;
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
 }
+#endif // MSG msg;
