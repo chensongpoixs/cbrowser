@@ -392,7 +392,7 @@ namespace chen {
 		//return;
 		if (type == PET_POPUP) 
 		{
-			return ;
+			//return ;
 			popup_layer_->on_paint(info.shared_texture_handle);
 			
 		}

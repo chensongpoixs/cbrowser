@@ -864,9 +864,12 @@ overflow: hidden; \
 					event.modifiers = KEYEVENT_CHAR;
 				}
 
-				
+				//event.windows_key_code = wParam;
+				//event.native_key_code = lParam;
+				event.is_system_key = true;
 			 
-				event.native_key_code = cevent.Data.KeyDown.KeyCode;//cevent.GetKeyDown();
+				event.windows_key_code = cevent.Data.KeyDown.KeyCode;//cevent.GetKeyDown();
+				event.native_key_code = cevent.Data.KeyDown.bIsRepeat;
 				//event.native_scancode = cevent.Data.KeyDown.bIsRepeat;
 				//event.y = 200;d
 				browser_source_ptr->SendKeyClick(event);
