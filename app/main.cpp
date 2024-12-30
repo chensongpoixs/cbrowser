@@ -29,6 +29,7 @@
 #include <thread>
 #include <windows.h>
 #include <iostream>
+#include "httplib.h"
 #include "cmediasoup_mgr.h"
 bool IsWindows11OrLater() {
 	DWORD dwMajorVersion = 0;
@@ -65,11 +66,122 @@ static void _fuf(void* f)
 	g_address = f;
 }
 
+static httplib::Server* g_http_server_ptr;
+std::string dump_headers(const httplib::Headers& headers) {
+	std::string s;
+	char buf[BUFSIZ];
 
+	for (auto it = headers.begin(); it != headers.end(); ++it) {
+		const auto& x = *it;
+		snprintf(buf, sizeof(buf), "%s: %s\n", x.first.c_str(), x.second.c_str());
+		s += buf;
+	}
+
+	return s;
+}
+
+static uint64_t hextobit(const std::string& data)
+{
+
+	uint64_t ret = 0;
+	for (size_t i = 0; i < data.length(); ++i)
+	{
+		uint64_t sum = 0;
+		if (data.at(i) != '0')
+		{
+			if (data.at(i) > '0' && data.at(i) <= '9')
+			{
+				sum = data.at(i) - '0';
+			}
+			else
+			{
+				sum = data.at(i) - 'A';
+				sum += 10;
+			}
+
+		}
+		if (ret > 0)
+		{
+			ret *= 16;
+		}
+		ret += sum;
+
+	}
+	return ret;
+}
+
+std::string log(const httplib::Request& req, const httplib::Response& res) {
+	std::string s;
+	char buf[BUFSIZ];
+
+	s += "================================\n";
+
+	snprintf(buf, sizeof(buf), "%s %s %s", req.method.c_str(),
+		req.version.c_str(), req.path.c_str());
+	s += buf;
+
+	std::string query;
+	for (auto it = req.params.begin(); it != req.params.end(); ++it) {
+		const auto& x = *it;
+		snprintf(buf, sizeof(buf), "%c%s=%s",
+			(it == req.params.begin()) ? '?' : '&', x.first.c_str(),
+			x.second.c_str());
+		query += buf;
+	}
+	snprintf(buf, sizeof(buf), "%s\n", query.c_str());
+	s += buf;
+
+	s += dump_headers(req.headers);
+
+	s += "--------------------------------\n";
+
+	snprintf(buf, sizeof(buf), "%d %s\n", res.status, res.version.c_str());
+	s += buf;
+	s += dump_headers(res.headers);
+	s += "\n";
+
+	if (!res.body.empty()) { s += res.body; }
+
+	s += "\n";
+
+	return s;
+}
+
+void init_http()
+{
+	g_http_server_ptr = new httplib::Server();
+
+	g_http_server_ptr->Get("/getHandle", [](const httplib::Request& /*req*/, httplib::Response& res)
+		{
+			//std::this_thread::sleep_for(std::chrono::seconds(2));
+
+
+
+			char buffer[1024] = { 0 };
+			sprintf(buffer, "%p", g_address);
+			
+
+			res.set_content(std::to_string(hextobit(std::string(buffer))), "application/json,charset=utf-8");
+		});
+	g_http_server_ptr->set_error_handler([](const httplib::Request& /*req*/, httplib::Response& res) {
+		const char* fmt = "<p>Error Status: <span style='color:red;'>%d</span></p>";
+		char buf[BUFSIZ];
+		snprintf(buf, sizeof(buf), fmt, res.status);
+		res.set_content(buf, "text/html");
+		});
+
+	g_http_server_ptr->set_logger([](const httplib::Request& req, const httplib::Response& res) {
+		printf("%s", log(req, res).c_str());
+		});
+	g_http_server_ptr->listen("localhost", 9094);
+}
 
 chen::cmediasoup_mgr* rtc_mgr = NULL;
 int main(int argc, char* argv[])
 {
+	std::thread([]() {
+		init_http();
+		}).detach();
 	rtc_mgr = new chen::cmediasoup_mgr();
 	rtc_mgr->init(0);
 	rtc_mgr->set_cinput_device_event_callback(&chen::input_device_event);
@@ -91,7 +203,7 @@ int main(int argc, char* argv[])
 	printf("app_work = %s\n", app_work.c_str());
 	std::string browser_config = std::string(czFileName) + "\\browser\\" + argv[5];
 	chen::browser_init(app_work.c_str(), browser_config.c_str());
-	chen::browser_startup("http://map.baidu.com", 1920, 1080, 30, &_fuf, std::atoi(argv[6]));
+	chen::browser_startup("http://map.baidu.com", 2077, 2077, 30, &_fuf, std::atoi(argv[6]));
 
 
 
@@ -100,7 +212,8 @@ int main(int argc, char* argv[])
 		{
 			if (g_address && rtc_mgr)
 			{
-				rtc_mgr->webrtc_texture(g_address, 87, 1920, 1080);
+				static void* ptr = (void*)0Xff111;
+				rtc_mgr->webrtc_texture(ptr, 87, 2077, 2077);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000/30));
 			}
 		}

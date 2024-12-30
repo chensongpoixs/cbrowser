@@ -107,6 +107,10 @@ namespace chen {
 		{
 			frame_buffer_->copy_shared_texture();
 		}
+		else
+		{
+			printf("[%s][%d]frame_buffer_ === nullptr  \n", __FUNCTION__, __LINE__);
+		}
 	}
 
 	std::pair<uint32_t, uint32_t> BrowserLayer::texture_size() const {
@@ -402,22 +406,25 @@ namespace chen {
 			
 		}
 
-		Render();
-
-
-		if (type == PET_POPUP) {
+		Render(type);
+		if (type == PET_POPUP)
+		{
+			//return ;
 			popup_layer_->copy_shared_textrue();
 
 		}
-		else {
-			browser_layer_->copy_shared_textrue( );
+		else
+		{
+			browser_layer_->copy_shared_textrue();
 
 		}
+
+		printf("[%s][%d] frame\n", __FUNCTION__, __LINE__);
 
 		//g_rtc_mgr.webrtc_texture(device_->pSharedHandle, 87, width_, height_);
 	}
 
-	void  crender_window::Render()
+	void  crender_window::Render(CefRenderHandler::PaintElementType type)
 	{
 		// Update composition + layers based on time.
 		const auto t = (GetTimeNow() - start_time_) / 1000000.0;
@@ -426,10 +433,21 @@ namespace chen {
 		auto ctx = device_->immedidate_context();
 		swap_chain_->bind(ctx);
 
-		const auto texture_size = browser_layer_->texture_size();
+		//const auto texture_size = browser_layer_->texture_size();
 
+		std::pair<uint32_t, uint32_t> texture_size;
+		if (type == PET_POPUP) 
+		{
+			//popup_layer_->copy_shared_textrue();
+			texture_size = popup_layer_->texture_size();
+		}
+		else
+		{
+			//browser_layer_->copy_shared_textrue();
+			texture_size = browser_layer_->texture_size();
+		}
 		// Resize the composition and swap chain to match the texture if necessary.
-		composition_->resize(!true, texture_size.first,
+		composition_->resize(false, texture_size.first,
 			texture_size.second);
 		swap_chain_->resize(texture_size.first, texture_size.second);
 
@@ -440,7 +458,13 @@ namespace chen {
 		composition_->render(ctx);
 
 		// Present to window.
-		swap_chain_->present(true ? 0 : 1);
+		swap_chain_->present(true);
+
+
+
+		// 
+		//swap_chain_->copy_texture(device_);
+		
 	}
 
 	void crender_window::_on_mouse_event(UINT message, WPARAM wParam, LPARAM lParam)
@@ -915,8 +939,8 @@ namespace chen {
 			MINMAXINFO* pMinMaxInfo = (MINMAXINFO*)lParam;
 			pMinMaxInfo->ptMinTrackSize.x = 200; // 最小宽度
 			pMinMaxInfo->ptMinTrackSize.y = 100; // 最小高度
-			pMinMaxInfo->ptMaxTrackSize.x = 1920; // 最大宽度
-			pMinMaxInfo->ptMaxTrackSize.y = 1080; // 最大高度
+			pMinMaxInfo->ptMaxTrackSize.x = 2077; // 最大宽度
+			pMinMaxInfo->ptMaxTrackSize.y = 2077; // 最大高度
 			return 0;
 		}
 

@@ -100,7 +100,7 @@ namespace chen {
 
 
 	private:
-		void Render()  ;
+		void Render(CefRenderHandler::PaintElementType type)  ;
 		
 
 

@@ -78,7 +78,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\deps\cef_binary_6533_windows_x64\;..\deps\librtc\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\deps\librtc\lib\x64\Release;..\deps\cef_binary_6533_windows_x64\Release;..\deps\cef_binary_6533_windows_x64\build\libcef_dll_wrapper\Release;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)lib\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>..\vsout\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

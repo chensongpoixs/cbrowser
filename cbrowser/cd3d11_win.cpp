@@ -104,6 +104,9 @@ namespace chen {
 
             FLOAT color[4] = { red, green, blue, alpha };
             d3d11_ctx->ClearRenderTargetView(rtv_.get(), color);
+
+
+           // swapchain_->GetBuffer();
         }
 
         void SwapChain::present(int sync_interval) {
@@ -169,6 +172,22 @@ namespace chen {
             d3d11_ctx->RSSetViewports(1, &vp);
         }
 
+        void SwapChain::copy_texture(std::shared_ptr<Device> device)
+        {
+            ID3D11Texture2D* buffer = nullptr;
+            HRESULT hr = swapchain_->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buffer);
+            if (FAILED(hr)) {
+                std::cout << "d3d11: Failed to resize swapchain (" << width_ << "x"
+                    << height_ << ")" << std::endl;
+                return;
+            }
+            if (device)
+            {
+                device->copy_shared_texture(buffer);
+            }
+            
+        }
+
         Effect::Effect(ID3D11VertexShader* vsh,
             ID3D11PixelShader* psh,
             ID3D11InputLayout* layout)
@@ -212,12 +231,16 @@ namespace chen {
 
         void Geometry::unbind() {}
 
-        void Geometry::draw() {
+        void Geometry::draw(/*std::shared_ptr<Device> dev*/) {
             ID3D11DeviceContext* d3d11_ctx = (ID3D11DeviceContext*)(*ctx_);
             CHECK(d3d11_ctx);
 
             // TODO: Handle offset.
             d3d11_ctx->Draw(vertices_, 0);
+           // d3d11_ctx->GetData();
+
+           // dev->copy_shared_texture((ID3D11Texture2D*)buffer_.get());
+           // d3d11_ctx->CopyResource(dev->)
         }
 
         Texture2D::Texture2D(ID3D11Texture2D* tex, ID3D11ShaderResourceView* srv)
@@ -641,20 +664,18 @@ namespace chen {
             desc.SampleDesc.Count = 1;
             desc.Usage = D3D11_USAGE_DEFAULT;
             desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-            /*if (0 != g_gpu_index)
-            {
-                desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
-            }
-            else
-            {
-                desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
-            } */
-            desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+            desc.SampleDesc.Count = 1;
+            desc.SampleDesc.Quality = 0;
+            desc.Usage = D3D11_USAGE_DEFAULT;
+            desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+            desc.CPUAccessFlags = 0;
+            
+            desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;// | */ D3D11_RESOURCE_MISC_SHARED_NTHANDLE;;// /*D3D11_RESOURCE_MISC_SHARED |*/ D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
             
             hr = device_->CreateTexture2D( &desc, NULL, &shared_texture);
             if (FAILED(hr))
             {
-                printf("gl_shtex_init_d3d11_tex: failed to create texture");
+                printf("gl_shtex_init_d3d11_tex: failed to create texture %u", hr);
                 return false;
             }
 
@@ -664,7 +685,7 @@ namespace chen {
             //>>>>>>> b5a2a73c8d165c99ef70c41948300d7e8e9bf805
             if (FAILED(hr))
             {
-                printf("gl_shtex_init_d3d11_tex: failed to create texture");
+                printf("gl_shtex_init_d3d11_tex:QueryInterface failed to create texture %u", hr);
                 return false;
             }
             hr = dxgi_res->GetSharedHandle(&pSharedHandle);//IDXGIResource_GetSharedHandle(dxgi_res, &data.handle);
@@ -921,7 +942,7 @@ float4 main(VS_OUTPUT input) : SV_Target
                 ScopedBinder<Texture2D> tex_binder(ctx, texture);
 
                 // Draw the quad.
-                geometry_->draw();
+                geometry_->draw(/*device_*/);
             }
         }
 

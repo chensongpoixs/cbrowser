@@ -180,6 +180,9 @@ namespace chen {
             int width() const { return width_; }
             int height() const { return height_; }
 
+
+
+            void copy_texture(std::shared_ptr<Device> device);
         private:
             const std::shared_ptr<ID3D11SamplerState> sampler_;
             const std::shared_ptr<ID3D11BlendState> blender_;
@@ -254,7 +257,7 @@ namespace chen {
             void bind(const std::shared_ptr<Context>& ctx);
             void unbind();
 
-            void draw();
+            void draw(/*std::shared_ptr<Device>  device*/);
 
         private:
             D3D_PRIMITIVE_TOPOLOGY primitive_;
